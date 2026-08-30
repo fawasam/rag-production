@@ -60,12 +60,15 @@ def load_golden_set():
 
 @pytest.mark.parametrize("case", load_golden_set(), ids=lambda c: c["id"])
 def test_golden_case(case):
-    chunks = retrieve(case["question"], top_k=TOP_K)
+    top_k = case.get("top_k", TOP_K)
+    chunks = retrieve(case["question"], top_k=top_k)
     retrieved_ids = [c.chunk_id for c in chunks]
     answer = generate_answer(case["question"], chunks)
     answer_lower = answer.lower()
 
     print(f"\nQ: {case['question']}")
+    if case.get("note"):
+        print(f"Why this is hard: {case['note']}")
     print(f"Retrieved: {retrieved_ids}")
     print(f"A: {answer}")
 
@@ -76,10 +79,18 @@ def test_golden_case(case):
         )
         return
 
+    # Single-chunk expectation (most cases).
     if case.get("expected_chunk_id"):
         assert case["expected_chunk_id"] in retrieved_ids, (
-            f"Expected chunk {case['expected_chunk_id']!r} not in top-{TOP_K} "
+            f"Expected chunk {case['expected_chunk_id']!r} not in top-{top_k} "
             f"retrieved: {retrieved_ids}"
+        )
+
+    # Multi-hop expectation: question needs chunks from more than one document.
+    for expected_id in case.get("expected_chunk_ids", []):
+        assert expected_id in retrieved_ids, (
+            f"Multi-hop question needs chunk {expected_id!r} but top-{top_k} "
+            f"retrieved only: {retrieved_ids}"
         )
 
     for substring in case.get("must_contain", []):
@@ -87,7 +98,15 @@ def test_golden_case(case):
             f"Expected answer to contain {substring!r} but got: {answer!r}"
         )
 
+    # At least one of these phrasings must appear (for answers with >1 valid wording).
+    any_of = case.get("must_contain_any", [])
+    if any_of:
+        assert any(s.lower() in answer_lower for s in any_of), (
+            f"Expected answer to contain at least one of {any_of!r} but got: {answer!r}"
+        )
+
     for substring in case.get("must_not_contain", []):
         assert substring.lower() not in answer_lower, (
-            f"Answer should NOT contain {substring!r} but got: {answer!r}"
+            f"Answer should NOT contain {substring!r} — likely hallucinated/confused "
+            f"with a nearby fact. Got: {answer!r}"
         )
