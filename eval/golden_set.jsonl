@@ -1,0 +1,8 @@
+{"id": "price_starter", "question": "What is the price of the Starter plan?", "expected_chunk_id": "product_overview.md::chunk_0", "must_contain": ["$9"], "unanswerable": false}
+{"id": "sso_team", "question": "Can Team plan customers use SSO?", "expected_chunk_id": "security_and_compliance.md::chunk_0", "must_contain": ["enterprise"], "must_not_contain": ["yes, team"], "unanswerable": false}
+{"id": "rate_limit_enterprise", "question": "What is the API rate limit for Enterprise plans?", "expected_chunk_id": "api_rate_limits.docx::chunk_0", "must_contain": ["5000"], "unanswerable": false}
+{"id": "support_hours_sev1", "question": "What is the target response time for a Sev-1 issue on the Enterprise plan?", "expected_chunk_id": "support_hours.pdf::chunk_0", "must_contain": ["1 hour"], "unanswerable": false}
+{"id": "data_residency_starter", "question": "Can Starter plan customers choose their data storage region?", "expected_chunk_id": "product_overview.md::chunk_0", "must_contain": ["us"], "unanswerable": false}
+{"id": "refund_window", "question": "How many days do I have to request a full refund after being charged?", "expected_chunk_id": "billing_faq.md::chunk_0", "must_contain": ["14"], "unanswerable": false}
+{"id": "onprem_unanswerable", "question": "Does Nimbus support an on-premise, self-hosted deployment option?", "expected_chunk_id": null, "must_contain": [], "unanswerable": true}
+{"id": "mobile_app_unanswerable", "question": "Is there a native mobile app for iOS and Android?", "expected_chunk_id": null, "must_contain": [], "unanswerable": true}
