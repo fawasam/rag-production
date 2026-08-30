@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 from src.ingestion.chunk import chunk_all
+from src.retrieval.bm25 import build_bm25_index
 
 load_dotenv()
 
@@ -68,9 +69,13 @@ def build_index(raw_dir: Path = None) -> int:
             for c in chunks
         ],
     )
+
+    # Sparse (BM25) index — the other half of Phase 2 hybrid search.
+    build_bm25_index(chunks)
+
     return len(chunks)
 
 
 if __name__ == "__main__":
     count = build_index()
-    print(f"Indexed {count} chunks into {CHROMA_DIR}")
+    print(f"Indexed {count} chunks into {CHROMA_DIR} (dense) and BM25 (sparse)")

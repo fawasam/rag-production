@@ -7,3 +7,5 @@ tiktoken
 pydantic
 pypdf
 python-docx
+rank_bm25
+sentence-transformers

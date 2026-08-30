@@ -1,18 +1,12 @@
-"""Phase 1 retrieval: plain dense similarity search over the Chroma index."""
-from dataclasses import dataclass
+"""Dense retrieval: semantic similarity search over the Chroma index.
 
+One retriever in the Phase 2 hybrid pipeline (see retrieval/hybrid.py) — also
+still usable standalone, which is what Phase 1 used.
+"""
 import chromadb
 
 from src.ingestion.index import CHROMA_DIR, COLLECTION_NAME, EMBEDDING_MODEL, get_openai_client
-
-
-@dataclass
-class RetrievedChunk:
-    chunk_id: str
-    text: str
-    doc_id: str
-    source_path: str
-    score: float  # similarity score, higher = more relevant
+from src.retrieval.types import RetrievedChunk
 
 
 def _get_collection():
