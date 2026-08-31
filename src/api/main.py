@@ -4,9 +4,11 @@
 Run:
     uvicorn src.api.main:app --reload
 """
+import logging
 import os
+import time
 
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -14,6 +16,7 @@ from src.api.rate_limit import enforce_rate_limit
 from src.generation.grounded_client import generate_grounded_answer
 from src.generation.llm_client import generate_answer
 from src.observability.logger import Timer, log_query
+from src.rerank.cross_encoder import _get_model
 from src.retrieval.dense import retrieve
 from src.retrieval.hybrid import retrieve_hybrid
 
@@ -30,6 +33,26 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["X-API-Key", "Content-Type"],
 )
+
+
+@app.middleware("http")
+async def log_response_time(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    duration = time.time() - start_time
+    client_host = request.client.host if request.client else "client"
+    print(
+        f"INFO:     {client_host} - \"{request.method} {request.url.path}\" "
+        f"{response.status_code} - Completed in {duration:.2f}s"
+    )
+    response.headers["X-Process-Time"] = f"{duration:.2f}s"
+    return response
+
+
+@app.on_event("startup")
+def warmup_models():
+    """Pre-load the cross-encoder reranker model into memory on server boot."""
+    _get_model()
 
 
 class QueryRequest(BaseModel):
