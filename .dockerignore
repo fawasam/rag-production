@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.git/
+.github/
+.env
+data/processed/
+data/logs/
+eval/eval_report.json
+eval/eval_history.jsonl
+eval/dashboard.html
+docs/

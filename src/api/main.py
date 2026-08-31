@@ -4,15 +4,32 @@
 Run:
     uvicorn src.api.main:app --reload
 """
-from fastapi import FastAPI
+import os
+
+from fastapi import Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from src.api.rate_limit import enforce_rate_limit
 from src.generation.grounded_client import generate_grounded_answer
 from src.generation.llm_client import generate_answer
+from src.observability.logger import Timer, log_query
 from src.retrieval.dense import retrieve
 from src.retrieval.hybrid import retrieve_hybrid
 
 app = FastAPI(title="RAG Production - Phase 2")
+
+# Fail-closed by default: no origins allowed until CORS_ALLOWED_ORIGINS is set.
+# This only matters for browser-based callers; server-to-server clients
+# (curl, backend services) aren't subject to CORS at all.
+_allowed_origins = [o.strip() for o in os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",") if o.strip()]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_allowed_origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST"],
+    allow_headers=["X-API-Key", "Content-Type"],
+)
 
 
 class QueryRequest(BaseModel):
@@ -39,11 +56,16 @@ def health():
     return {"status": "ok"}
 
 
-@app.post("/v1/query", response_model=GroundedQueryResponse)
+@app.post(
+    "/v1/query", response_model=GroundedQueryResponse, dependencies=[Depends(enforce_rate_limit)]
+)
 def query(request: QueryRequest):
     """Phase 2: dense + BM25 -> RRF fusion -> cross-encoder rerank -> grounded generation."""
-    debug = retrieve_hybrid(request.query)
-    result = generate_grounded_answer(request.query, debug.reranked_results)
+    with Timer() as t:
+        debug = retrieve_hybrid(request.query)
+        result = generate_grounded_answer(request.query, debug.reranked_results)
+
+    log_query(request.query, debug, result, latency_seconds=t.elapsed, timestamp=t.start)
 
     return GroundedQueryResponse(
         answer=result.answer,
@@ -61,7 +83,9 @@ def query(request: QueryRequest):
     )
 
 
-@app.post("/v1/query/naive", response_model=QueryResponse)
+@app.post(
+    "/v1/query/naive", response_model=QueryResponse, dependencies=[Depends(enforce_rate_limit)]
+)
 def query_naive(request: QueryRequest):
     """Phase 1: dense-only retrieval, no citation validation. Kept for comparison."""
     chunks = retrieve(request.query, top_k=request.top_k)

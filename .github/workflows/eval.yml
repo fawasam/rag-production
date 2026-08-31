@@ -1,0 +1,49 @@
+name: RAG Evaluation Gate
+
+# FR-2.9/FR-2.10 (SRS.md): run automated retrieval/generation tests and the
+# faithfulness/precision/recall/relevance eval on every PR touching retrieval,
+# prompts, or models. Blocks merge if a hard-gated metric fails (see gate.py).
+on:
+  pull_request:
+    paths:
+      - "src/**"
+      - "eval/golden_set.jsonl"
+      - "data/raw/**"
+      - "requirements.txt"
+  workflow_dispatch: {}
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Build indexes (dense + BM25) from data/raw
+        run: python -m src.ingestion.index
+
+      - name: Run Phase 1 + Phase 2 test suites
+        run: pytest tests/test_phase1.py tests/test_phase2.py -v
+
+      - name: Run faithfulness/precision/recall/relevance eval
+        run: python -m src.eval.run_eval
+
+      - name: Enforce evaluation gate
+        run: python -m src.eval.gate
+
+      - name: Upload eval report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-report
+          path: |
+            eval/eval_report.json
+            eval/eval_history.jsonl

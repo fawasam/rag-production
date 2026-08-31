@@ -1,0 +1,34 @@
+{
+  "billing_faq.md": {
+    "mtime": 1788115068.874627,
+    "chunk_ids": [
+      "billing_faq.md::chunk_0",
+      "billing_faq.md::chunk_1"
+    ]
+  },
+  "api_rate_limits.docx": {
+    "mtime": 1788073660.441428,
+    "chunk_ids": [
+      "api_rate_limits.docx::chunk_0"
+    ]
+  },
+  "product_overview.md": {
+    "mtime": 1788071948.226693,
+    "chunk_ids": [
+      "product_overview.md::chunk_0",
+      "product_overview.md::chunk_1"
+    ]
+  },
+  "security_and_compliance.md": {
+    "mtime": 1788071962.0245018,
+    "chunk_ids": [
+      "security_and_compliance.md::chunk_0"
+    ]
+  },
+  "support_hours.pdf": {
+    "mtime": 1788115068.8749676,
+    "chunk_ids": [
+      "support_hours.pdf::chunk_0"
+    ]
+  }
+}
