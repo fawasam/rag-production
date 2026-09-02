@@ -281,6 +281,8 @@
                                 <div class="badges-row">
                                     <span class="grounded-badge" id="groundedBadge">--</span>
                                     <span class="answerable-badge" id="answerableBadge">--</span>
+                                    <span class="badge-status success" id="securityBadge">🛡️ Safe</span>
+                                    <span class="badge-status purple hidden" id="piiBadge">🔒 PII Redacted</span>
                                 </div>
                             </div>
 
@@ -297,11 +299,11 @@
                             </div>
                         </div>
 
-                        <!-- 4-Stage Retrieval Debug Inspector -->
+                        <!-- Multi-Stage Retrieval Debug Inspector -->
                         <div class="card inspector-card hidden" id="inspectorCard">
                             <div class="inspector-header">
-                                <h2>🔎 Multi-Stage Retrieval Debug Inspector</h2>
-                                <p class="subtext">Trace candidates across dense vector search, sparse BM25, RRF fusion, and cross-encoder reranking</p>
+                                <h2>🔎 Multi-Stage Retrieval & Security Inspector</h2>
+                                <p class="subtext">Trace candidates across dense vector search, sparse BM25, RRF fusion, cross-encoder reranking, and security guardrails</p>
                             </div>
 
                             <div class="tabs-bar">
@@ -309,6 +311,7 @@
                                 <button class="tab-btn" data-tab="bm25">2. Sparse (BM25)</button>
                                 <button class="tab-btn" data-tab="fused">3. RRF Fused</button>
                                 <button class="tab-btn highlight" data-tab="reranked">4. Reranked Top-K</button>
+                                <button class="tab-btn" data-tab="security">🛡️ Security</button>
                             </div>
 
                             <div class="tab-contents">
@@ -323,6 +326,17 @@
                                 </div>
                                 <div class="tab-pane" id="tabPaneReranked">
                                     <div class="chunks-list" id="rerankedList"></div>
+                                </div>
+                                <div class="tab-pane" id="tabPaneSecurity">
+                                    <div style="margin-bottom:16px;">
+                                        <label style="font-weight:600; font-size:0.85rem; color:var(--text-secondary);">🛡️ Prompt Injection Shield</label>
+                                        <div id="securityInjectionStatus" style="font-size:0.9rem; font-weight:500; margin-top:4px;">✓ Passed</div>
+                                    </div>
+                                    <div>
+                                        <label style="font-weight:600; font-size:0.85rem; color:var(--text-secondary);">🔒 PII Redaction Log</label>
+                                        <div id="securityPiiStatus" style="font-size:0.9rem; font-weight:500; margin-top:4px;">No PII detected</div>
+                                        <div id="securityMaskedText" style="font-family:var(--font-mono); font-size:0.8rem; background:#F8FAFC; padding:10px; border-radius:var(--radius-sm); margin-top:8px; white-space:pre-wrap;" class="hidden"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

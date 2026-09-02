@@ -377,6 +377,54 @@ document.addEventListener('DOMContentLoaded', () => {
             invalidCitationsList.innerHTML = '';
         }
 
+        // Security Badges & Debug Info
+        const sec = data.debug?.security || {};
+        const securityBadge = document.getElementById('securityBadge');
+        const piiBadge = document.getElementById('piiBadge');
+        const securityInjectionStatus = document.getElementById('securityInjectionStatus');
+        const securityPiiStatus = document.getElementById('securityPiiStatus');
+        const securityMaskedText = document.getElementById('securityMaskedText');
+
+        if (securityBadge) {
+            if (sec.injection_blocked) {
+                securityBadge.className = 'badge-status partial';
+                securityBadge.textContent = '❌ Injection Blocked';
+            } else {
+                securityBadge.className = 'badge-status success';
+                securityBadge.textContent = '🛡️ Safe Query';
+            }
+        }
+
+        if (piiBadge) {
+            if (sec.pii_detected > 0) {
+                piiBadge.classList.remove('hidden');
+                piiBadge.textContent = `🔒 ${sec.pii_detected} PII Masked`;
+            } else {
+                piiBadge.classList.add('hidden');
+            }
+        }
+
+        if (securityInjectionStatus) {
+            if (sec.injection_blocked) {
+                securityInjectionStatus.innerHTML = `<span style="color:var(--accent-rose);">❌ Blocked (${escapeHtml(sec.violation_type)}: ${escapeHtml(sec.reason)})</span>`;
+            } else {
+                securityInjectionStatus.innerHTML = `<span style="color:var(--accent-green);">✓ Passed — No prompt injection detected</span>`;
+            }
+        }
+
+        if (securityPiiStatus) {
+            if (sec.pii_detected > 0) {
+                securityPiiStatus.innerHTML = `<span style="color:var(--primary-purple);">⚠️ Detected ${sec.pii_detected} PII entity/entities (${sec.pii_entities.map(e => e.type).join(', ')})</span>`;
+                if (securityMaskedText) {
+                    securityMaskedText.classList.remove('hidden');
+                    securityMaskedText.textContent = `Masked text sent to API:\n${sec.masked_query}`;
+                }
+            } else {
+                securityPiiStatus.innerHTML = `<span style="color:var(--text-secondary);">✓ No sensitive PII detected</span>`;
+                if (securityMaskedText) securityMaskedText.classList.add('hidden');
+            }
+        }
+
         renderChunkList(denseList, data.debug?.dense || []);
         renderChunkList(bm25List, data.debug?.bm25 || []);
         renderChunkList(fusedList, data.debug?.fused || []);

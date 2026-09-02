@@ -26,6 +26,8 @@ from src.observability.logger import LOG_PATH, Timer, log_query
 from src.rerank.cross_encoder import _get_model
 from src.retrieval.dense import retrieve
 from src.retrieval.hybrid import retrieve_hybrid
+from src.security.guardrails import check_prompt_injection
+from src.security.pii_masker import mask_pii
 
 app = FastAPI(title="RAG Production - Phase 2")
 
@@ -95,12 +97,47 @@ def health():
     "/v1/query", response_model=GroundedQueryResponse, dependencies=[Depends(enforce_rate_limit)]
 )
 def query(request: QueryRequest):
-    """Phase 2: dense + BM25 -> RRF fusion -> cross-encoder rerank -> grounded generation."""
-    with Timer() as t:
-        debug = retrieve_hybrid(request.query)
-        result = generate_grounded_answer(request.query, debug.reranked_results)
+    """Phase 2: Security checks -> Dense + BM25 -> RRF fusion -> Rerank -> Grounded generation."""
+    # 1. Prompt Injection Shield
+    is_safe, vtype, reason = check_prompt_injection(request.query)
+    if not is_safe:
+        security_info = {
+            "injection_blocked": True,
+            "violation_type": vtype,
+            "reason": reason,
+            "pii_detected": 0,
+            "pii_entities": [],
+            "masked_query": request.query,
+        }
+        log_query(
+            request.query, None, None, latency_seconds=0.01, timestamp=time.time(), security_debug=security_info
+        )
+        return GroundedQueryResponse(
+            answer=f"🛡️ Security Refusal: Request blocked due to prompt injection detection ({reason}).",
+            answerable=False,
+            citations_valid=False,
+            citations=[],
+            retrieved_chunk_ids=[],
+            debug={"security": security_info},
+        )
 
-    log_query(request.query, debug, result, latency_seconds=t.elapsed, timestamp=t.start)
+    # 2. PII Redaction Engine
+    masked_query, pii_entities = mask_pii(request.query)
+    security_info = {
+        "injection_blocked": False,
+        "pii_detected": len(pii_entities),
+        "pii_entities": pii_entities,
+        "masked_query": masked_query,
+    }
+
+    # 3. Retrieval & Grounded Generation using Masked Query
+    with Timer() as t:
+        debug = retrieve_hybrid(masked_query)
+        result = generate_grounded_answer(masked_query, debug.reranked_results)
+
+    log_query(
+        request.query, debug, result, latency_seconds=t.elapsed, timestamp=t.start, security_debug=security_info
+    )
 
     return GroundedQueryResponse(
         answer=result.answer,
@@ -109,6 +146,7 @@ def query(request: QueryRequest):
         citations=result.citations,
         retrieved_chunk_ids=result.retrieved_chunk_ids,
         debug={
+            "security": security_info,
             "dense": [c.chunk_id for c in debug.dense_results],
             "bm25": [c.chunk_id for c in debug.bm25_results],
             "fused": [c.chunk_id for c in debug.fused_results],
