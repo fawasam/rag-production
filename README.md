@@ -1,5 +1,11 @@
 # Production-Grade Grounded RAG API
 
+[![Python Version](https://img.shields.io/badge/python-3.11+-3776AB.svg?style=flat&logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688.svg?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![OpenAI](https://img.shields.io/badge/OpenAI-gpt--4o--mini-412991.svg?style=flat&logo=openai&logoColor=white)](https://openai.com/)
+[![ChromaDB](https://img.shields.io/badge/VectorDB-ChromaDB-orange.svg?style=flat)](https://www.trychroma.com/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg?style=flat)](LICENSE)
+
 A production-ready, enterprise-grade Retrieval-Augmented Generation (RAG) system built with **FastAPI**, **ChromaDB**, **BM25**, **Reciprocal Rank Fusion (RRF)**, **Cross-Encoder Re-ranking**, and **OpenAI Structured Generation**.
 
 Unlike basic AI wrappers, this system is engineered for **precision, zero-hallucination compliance, server-side citation validation, rate limiting, and incremental indexing**.
