@@ -1014,3 +1014,50 @@ textarea#queryInput {
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+
+/* Dropzone Styling */
+.dropzone {
+    border: 2px dashed var(--card-border);
+    border-radius: var(--radius-md);
+    padding: 32px;
+    text-align: center;
+    cursor: pointer;
+    background: #F8FAFC;
+    transition: all 0.2s ease;
+}
+
+.dropzone:hover, .dropzone.dragover {
+    border-color: var(--primary-purple);
+    background: var(--primary-purple-light);
+}
+
+.dropzone-icon {
+    font-size: 2.5rem;
+    margin-bottom: 8px;
+}
+
+.dropzone-text {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.upload-status {
+    margin-top: 14px;
+    padding: 10px;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.upload-status.success {
+    background: var(--accent-green-light);
+    color: var(--accent-green);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.upload-status.error {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--accent-rose);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+

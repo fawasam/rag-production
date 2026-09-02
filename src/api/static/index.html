@@ -30,6 +30,9 @@
                 <button class="nav-item" id="navPlayground" data-target="playgroundView">
                     <span class="nav-icon">💬</span> Query Playground
                 </button>
+                <button class="nav-item" id="navUpload" data-target="uploadView">
+                    <span class="nav-icon">📁</span> Upload & Ingest
+                </button>
 
                 <div class="nav-section-title">MONITORING & TELEMETRY</div>
                 <button class="nav-item" id="navLogs" data-target="logsView">
@@ -60,6 +63,7 @@
                 </div>
 
                 <div class="topbar-right">
+                    <button class="pill-btn" id="btnOpenUploadModal">📁 Upload Document</button>
                     <!-- New Query Action Button -->
                     <button class="btn-primary-purple" id="btnNewQuery">
                         <span>+ New Query</span>
@@ -385,6 +389,56 @@
                     </div>
                 </div>
             </div>
+
+            <!-- View 3: Upload & Ingest View -->
+            <div class="view-content" id="uploadView">
+                <div class="card margin-bottom">
+                    <div class="card-header-row">
+                        <h3>📁 Asynchronous File Ingestion & Auto-Watcher</h3>
+                    </div>
+                    <p class="subtext">Upload raw PDF, DOCX, Markdown, or TXT documents into <code>data/raw/</code>. Background <code>watchdog</code> automatically triggers incremental delta re-indexing.</p>
+                    <form id="viewUploadForm">
+                        <div class="dropzone" id="viewDropzone">
+                            <div class="dropzone-icon">📥</div>
+                            <div class="dropzone-text">Drag & drop document here or <strong>click to browse</strong></div>
+                            <input type="file" id="viewFileInput" accept=".pdf,.docx,.md,.txt" required class="hidden">
+                        </div>
+                        <div class="upload-status hidden" id="viewUploadStatus"></div>
+                        <div style="display:flex; justify-content:flex-end; margin-top:16px;">
+                            <button type="submit" class="btn-primary-purple">Upload & Index Document</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Existing Documents Table Card -->
+                <div class="card">
+                    <div class="card-header-row">
+                        <div>
+                            <h3>📂 Existing Raw Documents (<span id="existingDocCount">0</span>)</h3>
+                            <p class="subtext">Raw files stored in <code>data/raw/</code> and indexed in ChromaDB vector store</p>
+                        </div>
+                        <button class="pill-btn" id="btnRefreshDocs">🔄 Refresh List</button>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="audit-table">
+                            <thead>
+                                <tr>
+                                    <th>Document Name</th>
+                                    <th>Format</th>
+                                    <th>Size</th>
+                                    <th>Chunks</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="documentsTableBody">
+                                <tr>
+                                    <td colspan="5" class="text-center">Loading existing documents...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -399,6 +453,31 @@
         </div>
     </div>
 
+    <!-- Upload Modal -->
+    <div class="modal-overlay hidden" id="uploadModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>📁 Ingest New Raw Document</h3>
+                <button class="icon-btn" id="btnCloseUploadModal">✖</button>
+            </div>
+            <div class="modal-body">
+                <p class="subtext">Upload `.pdf`, `.docx`, `.md`, or `.txt` files into `data/raw/` for background delta indexing.</p>
+                <form id="uploadForm">
+                    <div class="dropzone" id="dropzone">
+                        <div class="dropzone-icon">📥</div>
+                        <div class="dropzone-text">Drag & drop document here or <strong>browse files</strong></div>
+                        <input type="file" id="fileInput" accept=".pdf,.docx,.md,.txt" required class="hidden">
+                    </div>
+                    <div class="upload-status hidden" id="uploadStatus"></div>
+                    <div style="display:flex; justify-content:flex-end; margin-top:16px;">
+                        <button type="submit" class="btn-primary-purple" id="btnSubmitUpload">Upload & Index</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="/static/app.js"></script>
 </body>
 </html>
+

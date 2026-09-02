@@ -11,7 +11,7 @@ import time
 
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, Request
+from fastapi import BackgroundTasks, Depends, FastAPI, File, HTTPException, Request, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -19,6 +19,9 @@ from pydantic import BaseModel
 from src.api.rate_limit import enforce_rate_limit
 from src.generation.grounded_client import generate_grounded_answer
 from src.generation.llm_client import generate_answer
+from src.ingestion.index import build_index
+from src.ingestion.parsers import SUPPORTED_EXTENSIONS
+from src.ingestion.watcher import start_watcher
 from src.observability.logger import LOG_PATH, Timer, log_query
 from src.rerank.cross_encoder import _get_model
 from src.retrieval.dense import retrieve
@@ -55,8 +58,13 @@ async def log_response_time(request: Request, call_next):
 
 @app.on_event("startup")
 def warmup_models():
-    """Pre-load the cross-encoder reranker model into memory on server boot."""
+    """Pre-load cross-encoder model & start background auto-watcher on boot."""
     _get_model()
+    try:
+        start_watcher()
+    except Exception as e:
+        print(f"WARNING: Could not start auto-watcher: {e}")
+
 
 
 class QueryRequest(BaseModel):
@@ -122,6 +130,88 @@ def query_naive(request: QueryRequest):
 
 RAW_DATA_PATH = Path(__file__).resolve().parents[2] / "data" / "raw"
 MANIFEST_PATH = Path(__file__).resolve().parents[2] / "data" / "processed" / "ingestion_manifest.json"
+
+
+@app.post("/v1/ingest", dependencies=[Depends(enforce_rate_limit)])
+async def ingest_document(
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(...)
+):
+    """Upload a raw document (.pdf, .docx, .md, .txt) and trigger background delta re-indexing."""
+    filename = file.filename or "uploaded_doc"
+    ext = Path(filename).suffix.lower()
+
+    if ext not in SUPPORTED_EXTENSIONS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported file format '{ext}'. Allowed: {sorted(SUPPORTED_EXTENSIONS)}"
+        )
+
+    RAW_DATA_PATH.mkdir(parents=True, exist_ok=True)
+    target_path = RAW_DATA_PATH / filename
+
+    contents = await file.read()
+    with open(target_path, "wb") as f:
+        f.write(contents)
+
+    background_tasks.add_task(build_index, force_full=False)
+
+    return {
+        "status": "uploaded",
+        "filename": filename,
+        "size_bytes": len(contents),
+        "message": f"File '{filename}' uploaded successfully. Background re-indexing scheduled."
+    }
+
+
+@app.get("/v1/documents", dependencies=[Depends(enforce_rate_limit)])
+def list_documents():
+    """List all existing raw documents in data/raw/ with chunk count from ingestion manifest."""
+    manifest = {}
+    if MANIFEST_PATH.exists():
+        try:
+            with open(MANIFEST_PATH, "r", encoding="utf-8") as mf:
+                manifest = json.load(mf)
+        except Exception:
+            pass
+
+    docs = []
+    if RAW_DATA_PATH.exists():
+        files = sorted(
+            [f for f in RAW_DATA_PATH.iterdir() if f.is_file() and not f.name.startswith(".")],
+            key=lambda x: x.name.lower()
+        )
+        for f in files:
+            ext = f.suffix.lower().replace(".", "")
+            manifest_info = manifest.get(f.name, {})
+            chunk_count = len(manifest_info.get("chunk_ids", []))
+            docs.append({
+                "filename": f.name,
+                "format": ext.upper() if ext else "OTHER",
+                "size_bytes": f.stat().st_size,
+                "mtime": f.stat().st_mtime,
+                "chunk_count": chunk_count
+            })
+
+    return {"total": len(docs), "documents": docs}
+
+
+@app.delete("/v1/documents/{filename}", dependencies=[Depends(enforce_rate_limit)])
+def delete_document(filename: str, background_tasks: BackgroundTasks):
+    """Delete a raw document from data/raw/ and trigger background index purge."""
+    target_path = RAW_DATA_PATH / filename
+    if not target_path.exists() or not target_path.is_file():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Document '{filename}' not found."
+        )
+
+    target_path.unlink()
+    background_tasks.add_task(build_index, force_full=False)
+
+    return {"status": "deleted", "filename": filename, "message": f"Document '{filename}' deleted. Index updated."}
+
+
 
 
 @app.get("/v1/logs", dependencies=[Depends(enforce_rate_limit)])

@@ -22,6 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (targetId === 'logsView') {
             fetchAnalytics();
+        } else if (targetId === 'uploadView') {
+            fetchExistingDocuments();
         }
     }
 
@@ -34,6 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (targetId === 'playgroundView') {
                 title = 'Query Playground';
                 subtitle = 'Test & Inspect Grounded Generation';
+            } else if (targetId === 'uploadView') {
+                title = 'Document Upload & Ingestion';
+                subtitle = 'Asynchronous File Ingestion & Auto-Watcher';
             } else if (targetId === 'logsView') {
                 title = 'Query Logs & Analytics';
                 subtitle = 'Production Telemetry Records';
@@ -494,8 +499,261 @@ document.addEventListener('DOMContentLoaded', () => {
         logModal.classList.remove('hidden');
     }
 
+    // Upload Modal Handlers
+    const btnOpenUploadModal = document.getElementById('btnOpenUploadModal');
+    const btnCloseUploadModal = document.getElementById('btnCloseUploadModal');
+    const uploadModal = document.getElementById('uploadModal');
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const uploadForm = document.getElementById('uploadForm');
+    const uploadStatus = document.getElementById('uploadStatus');
+
+    if (btnOpenUploadModal && uploadModal) {
+        btnOpenUploadModal.addEventListener('click', () => {
+            uploadStatus.className = 'upload-status hidden';
+            uploadModal.classList.remove('hidden');
+        });
+    }
+
+    if (btnCloseUploadModal && uploadModal) {
+        btnCloseUploadModal.addEventListener('click', () => {
+            uploadModal.classList.add('hidden');
+        });
+    }
+
+    if (dropzone && fileInput) {
+        dropzone.addEventListener('click', () => fileInput.click());
+
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('dragover');
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                const file = e.dataTransfer.files[0];
+                dropzone.querySelector('.dropzone-text').innerHTML = `Selected file: <strong>${escapeHtml(file.name)}</strong> (${Math.round(file.size / 1024)} KB)`;
+            }
+        });
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                dropzone.querySelector('.dropzone-text').innerHTML = `Selected file: <strong>${escapeHtml(file.name)}</strong> (${Math.round(file.size / 1024)} KB)`;
+            }
+        });
+    }
+
+    if (uploadForm) {
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!fileInput.files || fileInput.files.length === 0) return;
+
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            uploadStatus.className = 'upload-status';
+            uploadStatus.textContent = 'Uploading and scheduling background re-indexing...';
+            uploadStatus.classList.remove('hidden');
+
+            try {
+                const response = await fetch('/v1/ingest', {
+                    method: 'POST',
+                    headers: {
+                        'x-api-key': apiKeyInput?.value.trim() || 'X9usnoG4t0zcAujbzwEqhVllp_5LbKHKR3Tzn05U4zo'
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.detail || `Upload failed with status ${response.status}`);
+                }
+
+                uploadStatus.className = 'upload-status success';
+                uploadStatus.textContent = `✓ ${data.message || 'File uploaded successfully!'}`;
+
+                loadRealTelemetry();
+                setTimeout(() => {
+                    uploadModal.classList.add('hidden');
+                }, 2000);
+
+            } catch (err) {
+                uploadStatus.className = 'upload-status error';
+                uploadStatus.textContent = `❌ Upload failed: ${err.message}`;
+            }
+        });
+    }
+
+    // View Upload Dropzone Handlers
+    const viewDropzone = document.getElementById('viewDropzone');
+    const viewFileInput = document.getElementById('viewFileInput');
+    const viewUploadForm = document.getElementById('viewUploadForm');
+    const viewUploadStatus = document.getElementById('viewUploadStatus');
+
+    if (viewDropzone && viewFileInput) {
+        viewDropzone.addEventListener('click', () => viewFileInput.click());
+
+        viewDropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            viewDropzone.classList.add('dragover');
+        });
+
+        viewDropzone.addEventListener('dragleave', () => {
+            viewDropzone.classList.remove('dragover');
+        });
+
+        viewDropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            viewDropzone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                viewFileInput.files = e.dataTransfer.files;
+                const file = e.dataTransfer.files[0];
+                viewDropzone.querySelector('.dropzone-text').innerHTML = `Selected file: <strong>${escapeHtml(file.name)}</strong> (${Math.round(file.size / 1024)} KB)`;
+            }
+        });
+
+        viewFileInput.addEventListener('change', () => {
+            if (viewFileInput.files.length > 0) {
+                const file = viewFileInput.files[0];
+                viewDropzone.querySelector('.dropzone-text').innerHTML = `Selected file: <strong>${escapeHtml(file.name)}</strong> (${Math.round(file.size / 1024)} KB)`;
+            }
+        });
+    }
+
+    if (viewUploadForm) {
+        viewUploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!viewFileInput.files || viewFileInput.files.length === 0) return;
+
+            const file = viewFileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            viewUploadStatus.className = 'upload-status';
+            viewUploadStatus.textContent = 'Uploading and scheduling background re-indexing...';
+            viewUploadStatus.classList.remove('hidden');
+
+            try {
+                const response = await fetch('/v1/ingest', {
+                    method: 'POST',
+                    headers: {
+                        'x-api-key': apiKeyInput?.value.trim() || 'X9usnoG4t0zcAujbzwEqhVllp_5LbKHKR3Tzn05U4zo'
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.detail || `Upload failed with status ${response.status}`);
+                }
+
+                viewUploadStatus.className = 'upload-status success';
+                viewUploadStatus.textContent = `✓ ${data.message || 'File uploaded successfully!'}`;
+                loadRealTelemetry();
+                fetchExistingDocuments();
+
+            } catch (err) {
+                viewUploadStatus.className = 'upload-status error';
+                viewUploadStatus.textContent = `❌ Upload failed: ${err.message}`;
+            }
+        });
+    }
+
+    // Existing Documents Table Loader
+    const btnRefreshDocs = document.getElementById('btnRefreshDocs');
+    const documentsTableBody = document.getElementById('documentsTableBody');
+    const existingDocCount = document.getElementById('existingDocCount');
+
+    if (btnRefreshDocs) {
+        btnRefreshDocs.addEventListener('click', fetchExistingDocuments);
+    }
+
+    async function fetchExistingDocuments() {
+        if (!documentsTableBody) return;
+        documentsTableBody.innerHTML = '<tr><td colspan="5" class="text-center">Loading existing documents...</td></tr>';
+
+        try {
+            const response = await fetch('/v1/documents', {
+                headers: { 'x-api-key': apiKeyInput?.value.trim() || 'X9usnoG4t0zcAujbzwEqhVllp_5LbKHKR3Tzn05U4zo' }
+            });
+
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+            const data = await response.json();
+            const docs = data.documents || [];
+
+            if (existingDocCount) existingDocCount.textContent = data.total || 0;
+
+            if (docs.length === 0) {
+                documentsTableBody.innerHTML = '<tr><td colspan="5" class="text-center">No raw documents stored in data/raw/ yet.</td></tr>';
+                return;
+            }
+
+            documentsTableBody.innerHTML = docs.map(doc => {
+                const formatClass = doc.format.toLowerCase() === 'pdf' ? 'purple' : 'success';
+                const sizeKb = Math.round(doc.size_bytes / 1024);
+                const sizeStr = sizeKb > 1024 ? `${(sizeKb / 1024).toFixed(1)} MB` : `${sizeKb} KB`;
+
+                return `
+                    <tr>
+                        <td style="font-weight:500;" title="${escapeHtml(doc.filename)}">📄 ${escapeHtml(doc.filename)}</td>
+                        <td><span class="badge-status ${formatClass}">${escapeHtml(doc.format)}</span></td>
+                        <td>${sizeStr}</td>
+                        <td><span style="font-weight:600; color:var(--primary-purple);">${doc.chunk_count}</span> chunks</td>
+                        <td>
+                            <button class="pill-btn btn-delete-doc" data-filename="${escapeHtml(doc.filename)}" style="color:var(--accent-rose);">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.querySelectorAll('.btn-delete-doc').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const filename = btn.getAttribute('data-filename');
+                    if (confirm(`Are you sure you want to delete '${filename}'?`)) {
+                        await deleteDocument(filename);
+                    }
+                });
+            });
+
+        } catch (err) {
+            documentsTableBody.innerHTML = `<tr><td colspan="5" class="text-center" style="color:var(--accent-rose);">Failed to load documents: ${escapeHtml(err.message)}</td></tr>`;
+        }
+    }
+
+    async function deleteDocument(filename) {
+        try {
+            const response = await fetch(`/v1/documents/${encodeURIComponent(filename)}`, {
+                method: 'DELETE',
+                headers: { 'x-api-key': apiKeyInput?.value.trim() || 'X9usnoG4t0zcAujbzwEqhVllp_5LbKHKR3Tzn05U4zo' }
+            });
+
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.detail || `HTTP ${response.status}`);
+            }
+
+            fetchExistingDocuments();
+            loadRealTelemetry();
+        } catch (err) {
+            alert(`Failed to delete document: ${err.message}`);
+        }
+    }
+
     function escapeHtml(str) {
         if (!str) return '';
         return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 });
+
+
+
