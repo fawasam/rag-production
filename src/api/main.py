@@ -17,6 +17,8 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from src.api.rate_limit import enforce_rate_limit
+from src.eval.gate import check_gate
+from src.eval.run_eval import REPORT_PATH, run_eval
 from src.generation.grounded_client import generate_grounded_answer
 from src.generation.llm_client import generate_answer
 from src.ingestion.index import build_index
@@ -248,6 +250,46 @@ def delete_document(filename: str, background_tasks: BackgroundTasks):
     background_tasks.add_task(build_index, force_full=False)
 
     return {"status": "deleted", "filename": filename, "message": f"Document '{filename}' deleted. Index updated."}
+
+
+@app.get("/v1/eval", dependencies=[Depends(enforce_rate_limit)])
+def get_eval_results():
+    """Retrieve latest evaluation report and quality gate status."""
+    if not REPORT_PATH.exists():
+        return {
+            "has_report": False,
+            "message": "No evaluation report found. Trigger a run with POST /v1/eval/run.",
+        }
+
+    try:
+        report = json.loads(REPORT_PATH.read_text())
+        aggregates = report.get("aggregates", {})
+        passed, gate_messages = check_gate(aggregates)
+        return {
+            "has_report": True,
+            "passed_gate": passed,
+            "gate_messages": gate_messages,
+            "timestamp": report.get("timestamp"),
+            "num_cases": aggregates.get("num_cases", 0),
+            "aggregates": aggregates,
+            "case_results": report.get("case_results", []),
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error reading evaluation report: {e}",
+        )
+
+
+@app.post("/v1/eval/run", dependencies=[Depends(enforce_rate_limit)])
+def trigger_eval_run(background_tasks: BackgroundTasks):
+    """Trigger an offline benchmark evaluation run asynchronously across golden dataset."""
+    background_tasks.add_task(run_eval)
+    return {
+        "status": "scheduled",
+        "message": "Benchmark evaluation run scheduled in background across golden dataset.",
+    }
+
 
 
 

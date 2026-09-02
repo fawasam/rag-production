@@ -1,10 +1,10 @@
 {
-  "timestamp": 1788112639.518294,
+  "timestamp": 1788368199.8362849,
   "aggregates": {
     "faithfulness": 0.9861,
-    "context_precision": 0.2111,
-    "context_recall": 0.8889,
-    "answer_relevance": 0.9167,
+    "context_precision": 0.2,
+    "context_recall": 0.8611,
+    "answer_relevance": 0.95,
     "citation_validity_rate": 1.0,
     "retrieval_hit_rate": 1.0,
     "num_cases": 18
@@ -13,7 +13,7 @@
     {
       "id": "price_starter",
       "question": "What is the price of the Starter plan?",
-      "answer": "The price of the Starter plan is $9 per month.",
+      "answer": "The price of the Starter plan is $9/month.",
       "answerable": true,
       "citations_valid": true,
       "retrieval_hit": true,
@@ -22,7 +22,7 @@
         "billing_faq.md::chunk_0",
         "support_hours.pdf::chunk_0",
         "security_and_compliance.md::chunk_0",
-        "billing_faq.md::chunk_1"
+        "Land-Cover Classification Using Deep Learning with High-Resolution Remote-Sensing Imagery.pdf::chunk_25"
       ],
       "metrics": {
         "faithfulness": 1.0,
@@ -31,16 +31,16 @@
         "answer_relevance": 1.0
       },
       "metric_reasoning": {
-        "faithfulness": "The claim about the price of the Starter plan being $9 per month is directly supported by the context provided, which states the price clearly. Therefore, the claim is fully faithful to the context.",
-        "context_precision": "Only one context chunk (chunk 0) contains relevant information about the price of the Starter plan, while there are a total of 5 context chunks provided. Therefore, the score is 1 relevant chunk out of 5 total chunks, resulting in a score of 0.2.",
-        "context_recall": "The statement from the REFERENCE answer, 'The Starter plan costs $9 per month,' is directly supported by the CONTEXT, which explicitly states the price of the Starter plan as '$9/month.' Therefore, this statement is fully attributable to the CONTEXT.",
-        "answer_relevance": "The answer directly and completely addresses the question by providing the specific price of the Starter plan without any unnecessary information or ambiguity."
+        "faithfulness": "The claim about the price of the Starter plan being $9/month is directly supported by the context provided in the 'Plans' section, which explicitly states this price.",
+        "context_precision": "Only one context chunk (chunk 0) contains relevant information about the price of the Starter plan, which is explicitly stated as $9/month. The other chunks do not provide any relevant information regarding the price. Therefore, the score is 1 relevant chunk out of 5 total chunks.",
+        "context_recall": "The statement in the REFERENCE answer about the Starter plan costing $9 per month is directly supported by the CONTEXT, which explicitly states the price of the Starter plan as $9/month. Therefore, the statement is fully attributable to the CONTEXT.",
+        "answer_relevance": "The answer directly addresses the question by providing the specific price of the Starter plan without any unnecessary information or ambiguity."
       }
     },
     {
       "id": "sso_team",
       "question": "Can Team plan customers use SSO?",
-      "answer": "The context states that SSO is not available below the Enterprise tier, which means Team plan customers cannot use SSO.",
+      "answer": "Team plan customers cannot use SSO. The context states that \"Team and Starter plans use email/password or Google/Microsoft OAuth login only; SSO is not available below the Enterprise tier.\"",
       "answerable": false,
       "citations_valid": true,
       "retrieval_hit": true,
@@ -58,10 +58,10 @@
         "answer_relevance": 1.0
       },
       "metric_reasoning": {
-        "faithfulness": "The claim that SSO is not available below the Enterprise tier is directly supported by the context, which explicitly states that Team and Starter plans use email/password or Google/Microsoft OAuth login only, confirming that SSO is not an option for those plans. Therefore, the claim is fully faithful to the context.",
-        "context_precision": "Only one context chunk (chunk 0) is relevant to the question about SSO availability for Team plan customers. It explicitly states that SSO is not available for Team and Starter plans, which directly supports the reference answer. The other chunks do not provide any relevant information regarding SSO. Therefore, the score is 1 relevant chunk out of 5 total chunks.",
-        "context_recall": "The reference answer states that Team plan customers cannot use SSO and that SSO is only available on the Enterprise plan. The context supports this by explicitly stating that 'Team and Starter plans use email/password or Google/Microsoft OAuth login only; SSO is not available below the Enterprise tier.' Therefore, both statements in the reference answer are attributable to the context.",
-        "answer_relevance": "The answer directly addresses the question by stating that Team plan customers cannot use SSO, which is the information being asked for. It provides a clear and complete response without unnecessary padding."
+        "faithfulness": "The claim that Team plan customers cannot use SSO is directly supported by the context, which explicitly states that SSO is not available below the Enterprise tier. Therefore, the claim is fully faithful to the context.",
+        "context_precision": "Only one context chunk (chunk 0) is relevant to the question about SSO availability for Team plan customers. It explicitly states that SSO is not available for Team and Starter plans, which directly supports the reference answer. The other chunks do not provide any information related to SSO. Therefore, the score is 1 relevant chunk out of 5 total chunks.",
+        "context_recall": "The reference answer states that Team plan customers cannot use SSO and that SSO is only available on the Enterprise plan. The context supports this by explicitly stating that 'Team and Starter plans use email/password or Google/Microsoft OAuth login only; SSO is not available below the Enterprise tier.' Therefore, both statements in the reference answer are directly supported by the context.",
+        "answer_relevance": "The answer directly addresses the question by clearly stating that Team plan customers cannot use SSO and provides relevant context to support this statement. It is concise and on-topic, making it a complete response."
       }
     },
     {
@@ -86,7 +86,7 @@
       },
       "metric_reasoning": {
         "faithfulness": "The claim states that the API rate limit for Enterprise plans is 5000 requests per minute, which is directly supported by the context provided. The context explicitly states that the Enterprise plan allows for 5000 requests per minute. Therefore, this claim is fully supported by the context.",
-        "context_precision": "Only one context chunk (chunk 0) directly provides the relevant information about the API rate limit for Enterprise plans, which is 5000 requests per minute. The other chunks do not contain relevant information regarding the API rate limit. Therefore, the score is 1 relevant chunk out of 5 total chunks.",
+        "context_precision": "Only one context chunk (chunk 0) provides relevant information about the API rate limit for Enterprise plans, specifically stating that it is 5000 requests per minute. The other chunks do not contain relevant information regarding the API rate limit. Therefore, the score is 1 relevant chunk out of 5 total chunks.",
         "context_recall": "The reference answer states that the API rate limit for Enterprise plans is 5000 requests per minute. The context confirms this information in the 'Rate Limit by Plan' section, which explicitly lists the Enterprise plan with a rate limit of 5000 requests per minute. Therefore, the statement is fully supported by the context.",
         "answer_relevance": "The answer directly addresses the question by providing the specific API rate limit for Enterprise plans without any unnecessary information or padding. It is clear and complete."
       }
@@ -103,7 +103,7 @@
         "api_rate_limits.docx::chunk_0",
         "security_and_compliance.md::chunk_0",
         "billing_faq.md::chunk_0",
-        "billing_faq.md::chunk_1"
+        "Assessment of Machine Learning Algorithms for Land Cover Classification in a Complex Mountainous Landscape.pdf::chunk_15"
       ],
       "metrics": {
         "faithfulness": 1.0,
@@ -113,16 +113,16 @@
       },
       "metric_reasoning": {
         "faithfulness": "The claim about the target first response time for a Sev-1 issue on the Enterprise plan being 1 hour is directly supported by the context provided, which states that 'Enterprise plans include 24/7 phone and chat support with a target first response time of 1 hour for critical (Sev-1) issues.' Therefore, the claim is fully faithful to the context.",
-        "context_precision": "Only one context chunk (chunk 0) is relevant to the question about the target response time for a Sev-1 issue on the Enterprise plan. The other chunks (1, 2, and 3) do not provide any information related to the response time for Sev-1 issues. Therefore, the score is 1 relevant chunk out of 5 total chunks.",
-        "context_recall": "The reference answer states that the target first response time for a Sev-1 issue on the Enterprise plan is 1 hour. This is directly supported by the context, which explicitly mentions that 'Enterprise plans include 24/7 phone and chat support with a target first response time of 1 hour for critical (Sev-1) issues.' Therefore, the statement is fully attributable to the context.",
+        "context_precision": "Only one context chunk (chunk 0) is relevant to the question about the target response time for a Sev-1 issue on the Enterprise plan. The other chunks (1, 2, 3, and 4) do not provide any information related to the response time or Sev-1 issues. Therefore, the score is 1 relevant chunk out of 5 total chunks.",
+        "context_recall": "The statement in the REFERENCE answer about the target first response time for a Sev-1 issue on the Enterprise plan being 1 hour is directly supported by the CONTEXT, which explicitly states that the target first response time for critical (Sev-1) issues on Enterprise plans is indeed 1 hour. Therefore, the statement is fully attributable to the CONTEXT.",
         "answer_relevance": "The answer directly addresses the question by providing the specific target response time for a Sev-1 issue on the Enterprise plan without any unnecessary information or padding."
       }
     },
     {
       "id": "data_residency_starter",
       "question": "Can Starter plan customers choose their data storage region?",
-      "answer": "The context does not mention that Starter plan customers can choose their data storage region. It states that Starter and Team plans store data in the US region only.",
-      "answerable": false,
+      "answer": "No, Starter plan customers cannot choose their data storage region. Their data is stored in the US region only.",
+      "answerable": true,
       "citations_valid": true,
       "retrieval_hit": true,
       "retrieved_chunk_ids": [
@@ -130,19 +130,19 @@
         "security_and_compliance.md::chunk_0",
         "billing_faq.md::chunk_0",
         "product_overview.md::chunk_1",
-        "support_hours.pdf::chunk_0"
+        "2404.03936v2.pdf::chunk_21"
       ],
       "metrics": {
         "faithfulness": 1.0,
-        "context_precision": 0.4,
-        "context_recall": 1.0,
+        "context_precision": 0.2,
+        "context_recall": 0.5,
         "answer_relevance": 1.0
       },
       "metric_reasoning": {
-        "faithfulness": "The answer correctly identifies that the context specifies that Starter and Team plans store data in the US region only, and it accurately states that the context does not mention that Starter plan customers can choose their data storage region. Therefore, the claim is fully supported by the context.",
-        "context_precision": "Out of the 5 context chunks, only chunk [0] and chunk [3] provide relevant information regarding the data storage region for Starter plan customers. Chunk [0] explicitly states that Starter and Team plans store data in the US region only, which directly answers the question. Chunk [3] reiterates that data is stored in the US region only. The other chunks do not provide relevant information about the data storage region for Starter plan customers. Therefore, the score is 2 relevant chunks out of 5 total chunks.",
-        "context_recall": "The reference answer states that Starter plan customers cannot choose their data region and that their data is stored in the US region only. The context confirms that Starter and Team plans store data in the US region only, which supports the claim about the data region for Starter plan customers. Therefore, both statements in the reference answer are attributable to the context.",
-        "answer_relevance": "The answer directly addresses the question by stating that Starter plan customers cannot choose their data storage region, as it is limited to the US region only. It provides a clear and complete response based on the context given."
+        "faithfulness": "The answer correctly states that Starter plan customers cannot choose their data storage region and that their data is stored in the US region only, both of which are directly supported by the context provided. Therefore, both claims are supported, leading to a score of 1.0.",
+        "context_precision": "Only one context chunk (chunk 0) is relevant to the question about the Starter plan customers' data storage region. It explicitly states that Starter and Team plans store data in the US region only, which directly answers the question. The other chunks do not provide relevant information regarding the data storage region for Starter plan customers. Therefore, the score is 1 relevant chunk out of 5 total chunks.",
+        "context_recall": "The reference answer states that Starter plan customers cannot choose their data region and that their data is stored in the US region only. The context confirms that Starter and Team plans store data in the US region only, but it does not explicitly state that Starter plan customers cannot choose their data region. Therefore, one statement is fully supported, while the other is partially supported. This results in a score of 0.5.",
+        "answer_relevance": "The answer directly addresses the question by clearly stating that Starter plan customers cannot choose their data storage region and specifies that their data is stored in the US region only. It is complete and on-topic."
       }
     },
     {
@@ -154,10 +154,10 @@
       "retrieval_hit": true,
       "retrieved_chunk_ids": [
         "billing_faq.md::chunk_0",
-        "billing_faq.md::chunk_1",
         "api_rate_limits.docx::chunk_0",
-        "product_overview.md::chunk_1",
-        "security_and_compliance.md::chunk_0"
+        "security_and_compliance.md::chunk_0",
+        "2404.03936v2.pdf::chunk_16",
+        "2404.03936v2.pdf::chunk_15"
       ],
       "metrics": {
         "faithfulness": 1.0,
@@ -166,16 +166,16 @@
         "answer_relevance": 1.0
       },
       "metric_reasoning": {
-        "faithfulness": "The claim in the answer is directly supported by the context, which states that Nimbus offers a full refund within 14 days of the initial charge for any plan. Therefore, the claim is accurate and fully faithful to the provided context.",
-        "context_precision": "Only one context chunk (chunk 0) contains relevant information regarding the refund policy, specifically stating that a full refund can be requested within 14 days of the initial charge. The other chunks do not provide any relevant information related to the refund policy. Therefore, the score is 1 relevant chunk out of 5 total chunks.",
-        "context_recall": "The statement in the REFERENCE answer about having 14 days to request a full refund is directly supported by the CONTEXT, which explicitly states that Nimbus offers a full refund within 14 days of the initial charge for any plan. Therefore, the statement is fully attributable to the CONTEXT.",
+        "faithfulness": "The claim in the answer is directly supported by the context, which states that Nimbus offers a full refund within 14 days of the initial charge for any plan. Therefore, the claim is accurate and fully faithful to the context provided.",
+        "context_precision": "Only one context chunk (chunk 0) is relevant to the question about the refund policy, specifically stating the 14-day period for requesting a full refund. The other chunks (1, 2, 3, and 4) do not provide any information related to refunds. Therefore, the score is 1 relevant chunk out of 5 total chunks.",
+        "context_recall": "The statement in the REFERENCE answer about having 14 days to request a full refund is directly supported by the CONTEXT, which explicitly states that Nimbus offers a full refund within 14 days of the initial charge for any plan. Therefore, this statement is fully attributable to the CONTEXT.",
         "answer_relevance": "The answer directly addresses the question by providing a specific timeframe (14 days) for requesting a full refund after being charged. It is clear and complete, with no unnecessary information or ambiguity."
       }
     },
     {
       "id": "onprem_unanswerable",
       "question": "Does Nimbus support an on-premise, self-hosted deployment option?",
-      "answer": "The provided context does not mention anything about Nimbus supporting an on-premise, self-hosted deployment option.",
+      "answer": "The context does not mention anything about Nimbus supporting an on-premise, self-hosted deployment option.",
       "answerable": false,
       "citations_valid": true,
       "retrieval_hit": null,
@@ -190,13 +190,13 @@
         "faithfulness": 1.0,
         "context_precision": 0.0,
         "context_recall": 0.0,
-        "answer_relevance": 1.0
+        "answer_relevance": 0.7
       },
       "metric_reasoning": {
-        "faithfulness": "The answer correctly states that the context does not mention anything about Nimbus supporting an on-premise, self-hosted deployment option. This is accurate as the context only discusses cloud-based services and does not provide any information regarding on-premise solutions.",
-        "context_precision": "None of the context chunks provide information about an on-premise or self-hosted deployment option for Nimbus. The reference answer states that the documentation does not mention such an option, which is consistent with the lack of relevant information in the context. Therefore, the score is 0.0 as there are no relevant chunks.",
-        "context_recall": "The statement in the REFERENCE answer about the lack of an on-premise or self-hosted deployment option is not supported by the CONTEXT provided. The CONTEXT does not mention anything about deployment options, whether on-premise, self-hosted, or otherwise. Therefore, the statement cannot be attributed to the CONTEXT.",
-        "answer_relevance": "The answer directly addresses the question by stating that the provided context does not mention support for an on-premise, self-hosted deployment option for Nimbus. It is clear and relevant to the question asked."
+        "faithfulness": "The answer correctly states that the context does not mention anything about Nimbus supporting an on-premise, self-hosted deployment option. Since this claim is accurate and aligns with the provided context, it is fully faithful.",
+        "context_precision": "None of the context chunks provide information about an on-premise or self-hosted deployment option for Nimbus. The reference answer states that the documentation does not mention such an option, which is consistent with the lack of relevant information in the context. Therefore, the score is 0.0 as there are 0 relevant chunks out of 5 total chunks.",
+        "context_recall": "The statement in the REFERENCE answer about the lack of an on-premise or self-hosted deployment option is not supported by any information in the CONTEXT. The CONTEXT does not mention deployment options at all, focusing instead on support hours, security, compliance, and product features. Therefore, the score is 0.0 as there are no attributable statements.",
+        "answer_relevance": "The answer directly addresses the question by stating that the context does not provide information about Nimbus supporting an on-premise, self-hosted deployment option. However, it could be improved by explicitly stating that based on the available information, it cannot be confirmed whether such an option exists or not. Overall, it is relevant but lacks completeness."
       }
     },
     {
@@ -207,11 +207,11 @@
       "citations_valid": true,
       "retrieval_hit": null,
       "retrieved_chunk_ids": [
-        "billing_faq.md::chunk_1",
-        "product_overview.md::chunk_1",
-        "support_hours.pdf::chunk_0",
-        "product_overview.md::chunk_0",
-        "security_and_compliance.md::chunk_0"
+        "AI-Powered Lung Cancer Detection- Assessing VGG16 and CNN Architectures for CT Scan Image Classification.pdf::chunk_82",
+        "AI-Powered Lung Cancer Detection- Assessing VGG16 and CNN Architectures for CT Scan Image Classification.pdf::chunk_2",
+        "Deep learning-based approach to diagnose lung cancer using CT-scan images.pdf::chunk_31",
+        "2404.03936v2.pdf::chunk_4",
+        "Classi cation of NSCLC subtypes using lung microbiome from resected tissue based on machine learning methods.pdf::chunk_79"
       ],
       "metrics": {
         "faithfulness": 1.0,
@@ -220,9 +220,9 @@
         "answer_relevance": 0.8
       },
       "metric_reasoning": {
-        "faithfulness": "The answer correctly states that the context does not mention anything about a native mobile app for iOS and Android, which is accurate based on the provided information. Therefore, the claim is fully supported by the context.",
-        "context_precision": "None of the context chunks provided mention a native mobile app for iOS or Android, which is the key aspect of the question. Therefore, the score is 0.0 as there are no relevant chunks.",
-        "context_recall": "The REFERENCE answer states that there is no mention of a native mobile app for iOS or Android. The CONTEXT provided does not include any information about mobile applications, either confirming or denying their existence. Therefore, the statement in the REFERENCE answer cannot be attributed to the CONTEXT, resulting in a score of 0.0.",
+        "faithfulness": "The answer correctly states that the context does not mention anything about a native mobile app for iOS and Android. This is a faithful interpretation of the provided context, which focuses on various CNN architectures and their performance in lung cancer diagnostics without any reference to mobile applications. Therefore, the claim is fully supported by the context.",
+        "context_precision": "None of the context chunks provided any information about a native mobile app for iOS or Android. The reference answer states that the documentation does not mention such an app, which is not supported by any of the context chunks. Therefore, the score is 0.0.",
+        "context_recall": "The reference answer states that the documentation does not mention a native mobile app for iOS or Android. However, the context provided does not contain any information regarding mobile applications, native or otherwise. Therefore, the statement in the reference answer cannot be supported by the context. Since there are no attributable statements, the score is 0.0.",
         "answer_relevance": "The answer directly addresses the question by stating that the provided context does not mention a native mobile app for iOS and Android. However, it could be seen as incomplete since it does not provide any additional information or context that might help the user understand the situation better. Still, it is on-topic and does not dodge the question."
       }
     },
@@ -249,7 +249,7 @@
       "metric_reasoning": {
         "faithfulness": "The claim about the audit log retention for a Team plan customer is directly supported by the context, which states that the audit log is retained for 90 days on Team plans. Therefore, the claim is fully faithful to the context.",
         "context_precision": "Only one context chunk (chunk 0) contains relevant information about the audit log retention period for Team plan customers, specifically stating that it is retained for 90 days. The other chunks do not provide any relevant information regarding the audit log retention. Therefore, the score is 1 relevant chunk out of 5 total chunks.",
-        "context_recall": "The statement from the REFERENCE answer about the audit log being retained for 90 days for Team plan customers is directly supported by the CONTEXT, which explicitly states that the audit log is retained for 90 days on Team plans. Therefore, this statement is fully attributable to the CONTEXT.",
+        "context_recall": "The statement in the REFERENCE answer about the audit log being retained for 90 days for Team plan customers is directly supported by the CONTEXT, which explicitly states that the audit log is retained for 90 days on Team plans. Therefore, this statement is fully attributable to the CONTEXT.",
         "answer_relevance": "The answer directly and completely addresses the question by providing the specific retention period for the audit log of a Team plan customer, which is 90 days."
       }
     },
@@ -303,23 +303,23 @@
       "metric_reasoning": {
         "faithfulness": "The claim that the Team plan comes with 1 TB of storage is directly supported by the context provided, which states that the Team plan offers 1 TB of storage. Therefore, this claim is fully faithful to the context.",
         "context_precision": "Only one context chunk (chunk [0]) directly provides the relevant information about the storage capacity of the Team plan, which is 1 TB. The other chunks do not contain this specific information. Therefore, the score is 1 relevant chunk out of 5 total chunks.",
-        "context_recall": "The statement 'The Team plan comes with 1 TB of storage.' is directly supported by the CONTEXT, which explicitly states that the Team plan offers 1 TB of storage. Therefore, this statement is fully attributable to the CONTEXT.",
+        "context_recall": "The statement 'The Team plan comes with 1 TB of storage.' is directly supported by the CONTEXT, specifically in the 'Plans' section where it states that the 'Team' plan includes '1 TB storage'. Therefore, this statement is fully attributable to the CONTEXT.",
         "answer_relevance": "The answer directly addresses the question by providing the specific amount of storage included in the Team plan, which is exactly what was asked."
       }
     },
     {
       "id": "adv_negation_which_plans_lack_feature",
       "question": "Which plans do NOT include 24/7 phone support?",
-      "answer": "The Starter and Team plans do not include 24/7 phone support. Only Enterprise plans offer this feature, which includes 24/7 phone and chat support.",
+      "answer": "The Starter and Team plans do not include 24/7 phone support. Only Enterprise plans offer 24/7 phone and chat support.",
       "answerable": true,
       "citations_valid": true,
       "retrieval_hit": true,
       "retrieved_chunk_ids": [
         "support_hours.pdf::chunk_0",
-        "billing_faq.md::chunk_1",
         "security_and_compliance.md::chunk_0",
-        "product_overview.md::chunk_1",
-        "billing_faq.md::chunk_0"
+        "billing_faq.md::chunk_0",
+        "product_overview.md::chunk_0",
+        "fmed-12-1567119.pdf::chunk_27"
       ],
       "metrics": {
         "faithfulness": 1.0,
@@ -328,10 +328,10 @@
         "answer_relevance": 1.0
       },
       "metric_reasoning": {
-        "faithfulness": "The answer correctly states that the Starter and Team plans do not include 24/7 phone support and that only Enterprise plans offer this feature, which is directly supported by the context provided. Therefore, both claims are supported by the context, leading to a score of 1.0.",
+        "faithfulness": "The answer correctly states that the Starter and Team plans do not include 24/7 phone support, which is directly supported by the context. It also accurately mentions that only Enterprise plans offer 24/7 phone and chat support, which is also supported by the context. Therefore, both claims are supported, leading to a score of 1.0.",
         "context_precision": "Only the first context chunk (0) is relevant to the question about which plans do not include 24/7 phone support. The other chunks (1, 2, 3, and 4) do not provide any information related to the support plans. Therefore, the score is 1 relevant chunk out of 5 total chunks.",
-        "context_recall": "The reference answer states that the Starter and Team plans do not include 24/7 phone support, and only the Enterprise plan does. This is directly supported by the context, which specifies that standard support for the Starter and Team plans is available only during business hours (Monday through Friday, 9am to 6pm ET), while the Enterprise plan includes 24/7 phone and chat support. Therefore, both statements in the reference answer are attributable to the context.",
-        "answer_relevance": "The answer directly addresses the question by clearly stating which plans do not include 24/7 phone support, specifically naming the Starter and Team plans. It also provides additional context about the Enterprise plan, which is relevant but not necessary for answering the question. Overall, the response is on-topic and complete."
+        "context_recall": "The reference answer states that the Starter and Team plans do not include 24/7 phone support, which is supported by the context that specifies only the Enterprise plan includes 24/7 phone and chat support. Therefore, this statement is fully attributable to the context. The total number of statements in the reference answer is 1, and since it is fully supported, the score is 1.0.",
+        "answer_relevance": "The answer directly addresses the question by clearly stating which plans do not include 24/7 phone support, specifically naming the Starter and Team plans. It also provides additional context about the Enterprise plan, which is relevant but not necessary for answering the question. Overall, the response is direct and complete."
       }
     },
     {
@@ -343,36 +343,36 @@
       "retrieval_hit": true,
       "retrieved_chunk_ids": [
         "api_rate_limits.docx::chunk_0",
-        "billing_faq.md::chunk_1",
         "billing_faq.md::chunk_0",
-        "product_overview.md::chunk_1",
-        "support_hours.pdf::chunk_0"
+        "2510.26923v1.pdf::chunk_14",
+        "2602.10481v1.pdf::chunk_47",
+        "2602.10481v1.pdf::chunk_8"
       ],
       "metrics": {
         "faithfulness": 1.0,
         "context_precision": 0.2,
         "context_recall": 1.0,
-        "answer_relevance": 0.2
+        "answer_relevance": 1.0
       },
       "metric_reasoning": {
-        "faithfulness": "The answer correctly identifies that the context does not mention any monetary penalty for exceeding the API rate limit and accurately describes the response (HTTP 429) that is given when the limit is exceeded. Both claims made in the answer are supported by the context, leading to a score of 1.0.",
-        "context_precision": "Only the first context chunk (0) is relevant to the question about the monetary penalty for exceeding the API rate limit. It clearly states that there is no monetary penalty and describes the HTTP 429 response. The other chunks (1, 2, 3, and 4) do not provide any information related to the question. Therefore, the score is 1 relevant chunk out of 5 total chunks.",
-        "context_recall": "The reference answer states that there is no monetary penalty for exceeding the rate limit, which is supported by the context that mentions exceeding the limit results in an HTTP 429 response. The reference also correctly describes the HTTP 429 response and the Retry-After header, which is explicitly mentioned in the context. Therefore, both statements in the reference answer are attributable to the context.",
-        "answer_relevance": "The answer does not directly address the question about the monetary penalty fee for exceeding the API rate limit. Instead, it provides information about the HTTP response received when the limit is exceeded, which is not relevant to the question asked. Therefore, the answer is not on-topic and does not provide the requested information."
+        "faithfulness": "The answer correctly identifies that the context does not mention any monetary penalty for exceeding the API rate limit, which is supported by the context stating that exceeding the limit results in an HTTP 429 response. Therefore, the claim is fully faithful to the context.",
+        "context_precision": "Only context chunk [0] is relevant to the question about the monetary penalty for exceeding the API rate limit. It provides information about the HTTP 429 response and the Retry-After header, which is directly related to the consequences of exceeding the rate limit. The other chunks ([1], [2], [3], [4]) do not contain any relevant information regarding monetary penalties or the API rate limit. Therefore, the score is 1 relevant chunk out of 5 total chunks.",
+        "context_recall": "The reference answer states that there is no monetary penalty fee for exceeding the rate limit and that the only consequence is receiving an HTTP 429 response with a Retry-After header. The context confirms this by stating that requests beyond the limit receive an HTTP 429 response with a Retry-After header, but it does not mention any monetary penalties. Therefore, both statements in the reference answer are supported by the context.",
+        "answer_relevance": "The answer directly addresses the question by stating that there is no monetary penalty fee mentioned for exceeding the API rate limit. It provides relevant information about the response received when the limit is exceeded, which is pertinent to understanding the consequences of going over the limit. Therefore, it is on-topic and complete in its response."
       }
     },
     {
       "id": "adv_multihop_hipaa_and_phone_support",
       "question": "If I need HIPAA-compliant configuration and 24/7 phone support, which plan do I need?",
-      "answer": "You need the Enterprise plan to have HIPAA-compliant configurations and 24/7 phone support. The Enterprise plans support HIPAA-compliant configurations via a signed Business Associate Agreement (BAA) and include 24/7 phone and chat support.",
+      "answer": "To have HIPAA-compliant configurations and 24/7 phone support, you need the Enterprise plan. The Enterprise plan supports HIPAA-compliant configurations via a signed Business Associate Agreement (BAA) and includes 24/7 phone and chat support.",
       "answerable": true,
       "citations_valid": true,
       "retrieval_hit": true,
       "retrieved_chunk_ids": [
         "security_and_compliance.md::chunk_0",
         "support_hours.pdf::chunk_0",
-        "billing_faq.md::chunk_1",
-        "product_overview.md::chunk_1"
+        "product_overview.md::chunk_0",
+        "billing_faq.md::chunk_0"
       ],
       "metrics": {
         "faithfulness": 1.0,
@@ -381,16 +381,16 @@
         "answer_relevance": 1.0
       },
       "metric_reasoning": {
-        "faithfulness": "The answer correctly states that the Enterprise plan is required for HIPAA-compliant configurations and that it includes 24/7 phone support. Both claims are directly supported by the context provided. Therefore, the score is 1.0 as all claims are supported by the context.",
-        "context_precision": "There are 2 relevant context chunks (0 and 1) that provide the necessary information about HIPAA compliance and 24/7 phone support, which are essential for determining the correct plan. There are 4 total context chunks. Therefore, the score is 2/4 = 0.5.",
-        "context_recall": "The REFERENCE answer states that the Enterprise plan is the only one offering both HIPAA-compliant configuration and 24/7 phone support. The CONTEXT confirms that Enterprise plans support HIPAA-compliant configurations and provide 24/7 phone support, which directly supports the statements in the REFERENCE answer. Therefore, both statements in the REFERENCE answer are attributable to the CONTEXT.",
-        "answer_relevance": "The answer directly addresses the question by specifying that the Enterprise plan is required for HIPAA compliance and 24/7 phone support. It also provides additional relevant details about the plan's features, which enhances the completeness of the response."
+        "faithfulness": "The answer correctly states that the Enterprise plan supports HIPAA-compliant configurations via a signed Business Associate Agreement (BAA) and that it includes 24/7 phone and chat support. Both claims are directly supported by the context provided. Therefore, the score is 1.0 as all claims are supported.",
+        "context_precision": "The relevant chunks for answering the question about needing HIPAA-compliant configuration and 24/7 phone support are chunks [0] and [1]. Chunk [0] mentions that the Enterprise plan supports HIPAA-compliant configurations, and chunk [1] states that the Enterprise plan includes 24/7 phone support. Chunks [2] and [3] provide additional information about the plans but do not directly address the requirements of HIPAA compliance or support hours. Therefore, out of the 4 total chunks, 2 are relevant, leading to a score of 0.5.",
+        "context_recall": "The REFERENCE answer states that the Enterprise plan is the only plan offering both HIPAA-compliant configuration and 24/7 phone support. The CONTEXT confirms that the Enterprise plan supports HIPAA-compliant configurations and includes 24/7 phone support, which supports both parts of the REFERENCE answer. Therefore, both statements in the REFERENCE answer are attributable to the CONTEXT.",
+        "answer_relevance": "The answer directly addresses the question by specifying the required plan (Enterprise plan) and explains why it meets the needs for HIPAA compliance and 24/7 support. It is clear, concise, and fully relevant to the question asked."
       }
     },
     {
       "id": "adv_multihop_incident_and_storage_charge",
       "question": "As a Team plan customer, will I be notified faster than 5 business days if there is a security incident, and am I charged extra for exceeding my storage limit?",
-      "answer": "As a Team plan customer, you will not be notified faster than 5 business days in the event of a security incident. Team and Starter customers are notified via the status page and email within 5 business days. Additionally, if you exceed your storage limit, uploads will be blocked, but existing files will remain accessible, and you will receive an email warning at 90% usage. There are no extra charges for exceeding the storage limit, but you will not be able to upload new files until you reduce your usage.",
+      "answer": "As a Team plan customer, you will not be notified faster than 5 business days in the event of a security incident. Team customers are notified via the status page and email within 5 business days. Additionally, if you exceed your storage limit, uploads will be blocked, but existing files will remain accessible, and you will receive an email warning at 90% usage. Therefore, you are not charged extra for exceeding your storage limit, but you cannot upload more files until you reduce your usage.",
       "answerable": true,
       "citations_valid": true,
       "retrieval_hit": true,
@@ -407,25 +407,25 @@
         "answer_relevance": 1.0
       },
       "metric_reasoning": {
-        "faithfulness": "The answer correctly states that Team plan customers will not be notified faster than 5 business days in the event of a security incident, which is supported by the context. It also accurately describes the storage limit policy for Team plan customers, including the blocking of uploads and the warning at 90% usage. However, the claim about 'no extra charges for exceeding the storage limit' is misleading because while there are no charges for exceeding the limit, uploads are blocked, which implies a limitation rather than a lack of charges. Therefore, this claim is partially supported. Overall, the answer contains three supported claims and one partially supported claim, leading to a score of 0.75.",
-        "context_precision": "The relevant context chunks for answering the question are chunks [0] and [1]. Chunk [0] provides information about the notification timeline for Team plan customers in the event of a security incident, confirming that they are notified within 5 business days. Chunk [1] explains that exceeding the storage limit blocks uploads but does not incur extra charges, which directly addresses the second part of the question. Chunks [2] and [3] are not relevant to the question. Therefore, there are 2 relevant chunks out of a total of 4 chunks.",
+        "faithfulness": "The answer correctly states that Team plan customers will not be notified faster than 5 business days in the event of a security incident, which is supported by the context. It also accurately describes the storage limit policy for Team plan customers, including the blocking of uploads and the warning at 90% usage. However, the claim that \"you are not charged extra for exceeding your storage limit\" is misleading because while uploads are blocked, it does not explicitly state that there are no additional charges; it simply means that the user cannot upload more files until they reduce their usage. Therefore, this claim is not fully supported by the context. Overall, there are 3 supported claims and 1 unsupported claim, leading to a score of 0.75.",
+        "context_precision": "The relevant context chunks are [0] and [1]. Chunk [0] provides information about the notification timeline for security incidents for Team plan customers, confirming that they are notified within 5 business days. Chunk [1] explains that exceeding the storage limit blocks uploads but does not incur extra charges. Chunks [2] and [3] do not provide relevant information for the question. Therefore, there are 2 relevant chunks out of a total of 4 chunks.",
         "context_recall": "The REFERENCE answer contains two statements: (1) Team plan customers are notified within 5 business days, and (2) exceeding the storage limit only blocks uploads and does not incur an extra charge. Both statements are supported by the CONTEXT. The first statement is directly supported by the Incident Response section, and the second statement is supported by the Billing FAQ section. Therefore, both statements are attributable to the CONTEXT, resulting in a score of 1.0.",
-        "answer_relevance": "The answer directly addresses both parts of the question: it confirms that notifications for security incidents will not be faster than 5 business days and clarifies the policy regarding charges for exceeding storage limits. It provides complete information relevant to the user's inquiries without unnecessary padding."
+        "answer_relevance": "The answer directly addresses both parts of the question: it confirms that notifications for security incidents will not be faster than 5 business days and clarifies that there are no extra charges for exceeding the storage limit, while also explaining the consequences of exceeding that limit. This makes the response complete and on-topic."
       }
     },
     {
       "id": "adv_ambiguous_unspecified_plan",
       "question": "How long until I'm notified if there is a security incident affecting my data?",
-      "answer": "If there is a security incident affecting customer data, Nimbus commits to notifying affected Enterprise customers within 72 hours. For Team and Starter customers, notifications are sent via the status page and email within 5 business days.",
+      "answer": "If you are an Enterprise customer, you will be notified within 72 hours of a security incident affecting your data. For Team and Starter customers, notifications will be sent via the status page and email within 5 business days.",
       "answerable": true,
       "citations_valid": true,
       "retrieval_hit": true,
       "retrieved_chunk_ids": [
         "security_and_compliance.md::chunk_0",
-        "billing_faq.md::chunk_1",
-        "product_overview.md::chunk_1",
         "billing_faq.md::chunk_0",
-        "support_hours.pdf::chunk_0"
+        "support_hours.pdf::chunk_0",
+        "2602.10481v1.pdf::chunk_25",
+        "2602.10481v1.pdf::chunk_18"
       ],
       "metrics": {
         "faithfulness": 1.0,
@@ -434,10 +434,10 @@
         "answer_relevance": 1.0
       },
       "metric_reasoning": {
-        "faithfulness": "The answer accurately reflects the information provided in the context regarding the notification timelines for affected customers in the event of a security incident. Both claims about the notification times for Enterprise customers (within 72 hours) and for Team and Starter customers (within 5 business days) are directly supported by the context. Therefore, all claims are supported, resulting in a score of 1.0.",
-        "context_precision": "Only one context chunk (chunk 3) is relevant to the question about notification times for security incidents. The other chunks provide information on encryption, compliance, billing, and support hours, which do not address the question. Therefore, the score is 1 relevant chunk out of 5 total chunks.",
-        "context_recall": "The reference answer contains two statements regarding notification times for different customer plans. Both statements are directly supported by the context provided under the 'Incident Response' section, which specifies the notification timelines for Enterprise, Team, and Starter customers. Therefore, both statements are attributable to the context, resulting in a score of 1.0.",
-        "answer_relevance": "The answer directly addresses the question by providing specific timeframes for notifications based on customer type, which is exactly what the question is asking for. It is clear and complete without any unnecessary information."
+        "faithfulness": "The answer accurately reflects the information provided in the context regarding notification timelines for Enterprise, Team, and Starter customers in the event of a security incident. Both claims about the notification times for Enterprise (72 hours) and Team/Starter (5 business days) customers are directly supported by the context. Therefore, both claims are supported, leading to a score of 1.0.",
+        "context_precision": "Only one context chunk (chunk 3) is relevant to the question about notification times for security incidents. The other chunks do not provide any information related to the notification timeline for security incidents. Therefore, the score is 1 relevant chunk out of 5 total chunks.",
+        "context_recall": "The reference answer contains two statements regarding notification timelines for different customer plans. The context supports both statements: it explicitly states that Enterprise customers are notified within 72 hours and Team and Starter customers are notified within 5 business days. Therefore, both statements are attributable to the context, resulting in a score of 1.0.",
+        "answer_relevance": "The answer directly addresses the question by providing specific timeframes for notification based on customer type, which is exactly what was asked. It is clear and complete without any unnecessary information."
       }
     },
     {
@@ -449,10 +449,10 @@
       "retrieval_hit": true,
       "retrieved_chunk_ids": [
         "billing_faq.md::chunk_0",
-        "billing_faq.md::chunk_1",
-        "product_overview.md::chunk_1",
         "product_overview.md::chunk_0",
-        "security_and_compliance.md::chunk_0"
+        "security_and_compliance.md::chunk_0",
+        "LungPaper.pdf::chunk_29",
+        "api_rate_limits.docx::chunk_0"
       ],
       "metrics": {
         "faithfulness": 1.0,
@@ -461,9 +461,9 @@
         "answer_relevance": 1.0
       },
       "metric_reasoning": {
-        "faithfulness": "The answer accurately reflects the information provided in the context regarding the behavior of the Starter and Team plans when the storage limit is exceeded. It states that uploads are blocked but existing files remain accessible, and that an email warning is sent at 90% usage, which is directly supported by the context. Therefore, all claims made in the answer are supported by the context, resulting in a score of 1.0.",
-        "context_precision": "Only one context chunk (chunk 0) is relevant to the question about exceeding the storage limit on the Starter plan. It directly addresses the consequences of exceeding the storage limit, stating that uploads are blocked but existing files remain accessible. The other chunks do not provide relevant information regarding the specific question asked. Therefore, the score is 1 relevant chunk out of 5 total chunks.",
-        "context_recall": "The reference answer states that exceeding the Starter plan's storage limit blocks new uploads but existing files remain accessible, and that users are not locked out immediately. This is directly supported by the context, which specifies that on the Starter plan, exceeding the storage limit results in blocked uploads while existing files remain accessible. Therefore, both statements in the reference answer are attributable to the context.",
+        "faithfulness": "The answer correctly states that on the Starter and Team plans, exceeding the storage limit results in uploads being blocked while existing files remain accessible. It also accurately mentions that users will receive an email warning at 90% usage, indicating that they won't be locked out immediately. Both claims are directly supported by the context provided.",
+        "context_precision": "Only one context chunk (chunk 1) directly addresses the question about exceeding the storage limit on the Starter plan, confirming that uploads are blocked but existing files remain accessible. The other chunks do not provide relevant information regarding the specific question about being locked out or the implications of exceeding the storage cap. Therefore, the score is 1 relevant chunk out of 5 total chunks.",
+        "context_recall": "The reference answer states that exceeding the Starter plan's storage limit blocks new uploads but existing files remain accessible, and that users are not locked out immediately. The context confirms this information, specifically stating that on the Starter plan, if the storage limit is exceeded, uploads are blocked but existing files remain accessible. Therefore, both statements in the reference answer are supported by the context.",
         "answer_relevance": "The answer directly addresses the question by explaining what happens when the storage cap is exceeded, specifically stating that uploads are blocked but existing files remain accessible, and clarifying that there is a warning before being locked out. This provides a complete and relevant response to the question asked."
       }
     },
@@ -485,13 +485,13 @@
         "faithfulness": 1.0,
         "context_precision": 0.0,
         "context_recall": 1.0,
-        "answer_relevance": 0.6
+        "answer_relevance": 0.7
       },
       "metric_reasoning": {
-        "faithfulness": "The answer correctly identifies that the context does not mention two-factor authentication (2FA) for login, which is a faithful interpretation of the provided information. It does not assert any unsupported claims and accurately reflects the absence of information about 2FA in the context.",
-        "context_precision": "None of the context chunks provide information about two-factor authentication (2FA) for login. The reference answer states that the documentation does not mention 2FA, which is consistent with the absence of relevant information in the context. Therefore, the score is 0.0 as there are 0 relevant chunks out of 5 total chunks.",
-        "context_recall": "The reference answer states that the documentation does not mention two-factor authentication (2FA) as a supported login method. The context provided does not include any information about 2FA, nor does it imply its existence or support. Therefore, the statement is fully supported by the context, leading to a score of 1.0.",
-        "answer_relevance": "The answer directly addresses the question by stating that the provided context does not include information about two-factor authentication (2FA) for login. However, it does not attempt to provide any additional information or context that could help the user understand the situation better, such as suggesting where to find more information or indicating if 2FA is a common feature in similar services. Therefore, while it is relevant, it lacks completeness."
+        "faithfulness": "The answer correctly identifies that the context does not mention two-factor authentication (2FA) for login, which is a valid conclusion based on the provided information. Since it does not assert any unsupported claims and accurately reflects the absence of information, it is fully faithful.",
+        "context_precision": "The context provided does not mention two-factor authentication (2FA) at all. Therefore, none of the context chunks are relevant to answering the question about 2FA support. The score is 0.0 because there are 0 relevant chunks out of 5 total chunks.",
+        "context_recall": "The reference answer states that the documentation does not mention two-factor authentication (2FA) as a supported login method. The context provided does not mention 2FA at all, nor does it imply its existence or support. The only login methods mentioned are email/password, Google/Microsoft OAuth, and SSO for Enterprise plans. Therefore, the statement in the reference answer is fully supported by the context, leading to a score of 1.0.",
+        "answer_relevance": "The answer directly addresses the question by stating that the provided context does not include information about two-factor authentication (2FA) for login. However, it does not provide any additional information or context that could help the user understand the situation better. It is clear and on-topic, but it lacks completeness since it does not explore any alternatives or suggest where to find more information."
       }
     }
   ]

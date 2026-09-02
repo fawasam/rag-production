@@ -1,2 +1,4 @@
 {"timestamp": 1788112335.906515, "faithfulness": 0.9861, "context_precision": 0.2028, "context_recall": 0.8333, "answer_relevance": 0.9056, "citation_validity_rate": 1.0, "retrieval_hit_rate": 1.0, "num_cases": 18}
 {"timestamp": 1788112639.518294, "faithfulness": 0.9861, "context_precision": 0.2111, "context_recall": 0.8889, "answer_relevance": 0.9167, "citation_validity_rate": 1.0, "retrieval_hit_rate": 1.0, "num_cases": 18}
+{"timestamp": 1788368039.381614, "faithfulness": 0.9861, "context_precision": 0.2139, "context_recall": 0.8611, "answer_relevance": 0.95, "citation_validity_rate": 1.0, "retrieval_hit_rate": 1.0, "num_cases": 18}
+{"timestamp": 1788368199.8362849, "faithfulness": 0.9861, "context_precision": 0.2, "context_recall": 0.8611, "answer_relevance": 0.95, "citation_validity_rate": 1.0, "retrieval_hit_rate": 1.0, "num_cases": 18}

@@ -24,6 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
             fetchAnalytics();
         } else if (targetId === 'uploadView') {
             fetchExistingDocuments();
+        } else if (targetId === 'evalView') {
+            fetchEvaluationResults();
         }
     }
 
@@ -42,6 +44,9 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (targetId === 'logsView') {
                 title = 'Query Logs & Analytics';
                 subtitle = 'Production Telemetry Records';
+            } else if (targetId === 'evalView') {
+                title = 'Evaluation & Quality Leaderboard';
+                subtitle = 'Automated Golden Dataset Benchmark & CI/CD Quality Gate';
             }
 
             switchView(targetId, title, subtitle);
@@ -797,11 +802,124 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Evaluation View Loader & Trigger
+    const btnRunEval = document.getElementById('btnRunEval');
+    const evalTableBody = document.getElementById('evalTableBody');
+    const evalGateBadge = document.getElementById('evalGateBadge');
+    const evalGateSubtitle = document.getElementById('evalGateSubtitle');
+    const gateMessagesBox = document.getElementById('gateMessagesBox');
+
+    const evalFaithfulness = document.getElementById('evalFaithfulness');
+    const evalCitationValid = document.getElementById('evalCitationValid');
+    const evalRelevance = document.getElementById('evalRelevance');
+    const evalHitRate = document.getElementById('evalHitRate');
+
+    if (btnRunEval) {
+        btnRunEval.addEventListener('click', async () => {
+            if (!confirm('Run offline benchmark evaluation across 19 golden test cases?')) return;
+            btnRunEval.disabled = true;
+            btnRunEval.textContent = '⏳ Running Eval...';
+
+            try {
+                const response = await fetch('/v1/eval/run', {
+                    method: 'POST',
+                    headers: { 'x-api-key': apiKeyInput?.value.trim() || 'X9usnoG4t0zcAujbzwEqhVllp_5LbKHKR3Tzn05U4zo' }
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                alert('Benchmark evaluation scheduled! Results will automatically update upon completion.');
+
+                let attempts = 0;
+                const interval = setInterval(async () => {
+                    attempts++;
+                    await fetchEvaluationResults();
+                    if (attempts >= 12) {
+                        clearInterval(interval);
+                        btnRunEval.disabled = false;
+                        btnRunEval.textContent = '▶ Run Benchmark Eval';
+                    }
+                }, 5000);
+
+            } catch (err) {
+                alert(`Failed to trigger evaluation: ${err.message}`);
+                btnRunEval.disabled = false;
+                btnRunEval.textContent = '▶ Run Benchmark Eval';
+            }
+        });
+    }
+
+    async function fetchEvaluationResults() {
+        if (!evalTableBody) return;
+
+        try {
+            const response = await fetch('/v1/eval', {
+                headers: { 'x-api-key': apiKeyInput?.value.trim() || 'X9usnoG4t0zcAujbzwEqhVllp_5LbKHKR3Tzn05U4zo' }
+            });
+
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+            const data = await response.json();
+            if (!data.has_report) {
+                evalTableBody.innerHTML = `<tr><td colspan="7" class="text-center">${escapeHtml(data.message)}</td></tr>`;
+                return;
+            }
+
+            const agg = data.aggregates || {};
+            const caseResults = data.case_results || [];
+
+            if (evalGateBadge) {
+                if (data.passed_gate) {
+                    evalGateBadge.className = 'badge-status success';
+                    evalGateBadge.textContent = '✅ PASSED';
+                } else {
+                    evalGateBadge.className = 'badge-status partial';
+                    evalGateBadge.textContent = '❌ FAILED HARD GATE';
+                }
+            }
+
+            if (evalGateSubtitle) {
+                const dateStr = data.timestamp ? new Date(data.timestamp * 1000).toLocaleString() : 'Recent';
+                evalGateSubtitle.textContent = `Evaluated across ${data.num_cases || 19} golden test cases • Last run: ${dateStr}`;
+            }
+
+            if (gateMessagesBox && data.gate_messages) {
+                gateMessagesBox.innerHTML = data.gate_messages.map(m => `<div>${escapeHtml(m)}</div>`).join('');
+            }
+
+            if (evalFaithfulness) evalFaithfulness.textContent = agg.faithfulness !== null ? agg.faithfulness.toFixed(3) : '--';
+            if (evalCitationValid) evalCitationValid.textContent = agg.citation_validity_rate !== null ? `${(agg.citation_validity_rate * 100).toFixed(1)}%` : '--%';
+            if (evalRelevance) evalRelevance.textContent = agg.answer_relevance !== null ? agg.answer_relevance.toFixed(3) : '--';
+            if (evalHitRate) evalHitRate.textContent = agg.retrieval_hit_rate !== null ? `${(agg.retrieval_hit_rate * 100).toFixed(1)}%` : '--%';
+
+            evalTableBody.innerHTML = caseResults.map(res => {
+                const m = res.metrics || {};
+                const hitBadge = res.retrieval_hit ? '<span style="color:var(--accent-green);">✓ Hit</span>' : '<span style="color:var(--accent-rose);">Miss</span>';
+                const statusBadge = res.citations_valid ? '<span class="badge-status success">✓ Valid</span>' : '<span class="badge-status partial">Warning</span>';
+
+                return `
+                    <tr>
+                        <td style="font-weight:600;">${escapeHtml(res.id)}</td>
+                        <td title="${escapeHtml(res.question)}">${escapeHtml(res.question)}</td>
+                        <td>${m.faithfulness !== null ? m.faithfulness.toFixed(2) : '--'}</td>
+                        <td>${m.context_precision !== null ? m.context_precision.toFixed(2) : '--'}</td>
+                        <td>${m.context_recall !== null ? m.context_recall.toFixed(2) : '--'}</td>
+                        <td>${hitBadge}</td>
+                        <td>${statusBadge}</td>
+                    </tr>
+                `;
+            }).join('');
+
+        } catch (err) {
+            evalTableBody.innerHTML = `<tr><td colspan="7" class="text-center" style="color:var(--accent-rose);">Failed to load evaluation results: ${escapeHtml(err.message)}</td></tr>`;
+        }
+    }
+
     function escapeHtml(str) {
         if (!str) return '';
         return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 });
+
 
 
 

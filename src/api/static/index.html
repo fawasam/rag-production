@@ -38,6 +38,9 @@
                 <button class="nav-item" id="navLogs" data-target="logsView">
                     <span class="nav-icon">📋</span> Query Logs & Analytics
                 </button>
+                <button class="nav-item" id="navEval" data-target="evalView">
+                    <span class="nav-icon">🏆</span> Evaluation & Quality
+                </button>
             </nav>
 
             <!-- Bottom System Status Card -->
@@ -447,6 +450,80 @@
                             <tbody id="documentsTableBody">
                                 <tr>
                                     <td colspan="5" class="text-center">Loading existing documents...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View 4: Evaluation & Quality View -->
+            <div class="view-content" id="evalView">
+                <!-- Quality Gate Status Banner -->
+                <div class="card margin-bottom" id="gateBannerCard">
+                    <div class="card-header-row">
+                        <div>
+                            <h3>🏆 CI/CD Quality Gate Status: <span id="evalGateBadge" class="badge-status success">PASSED</span></h3>
+                            <p class="subtext" id="evalGateSubtitle">Evaluated across golden dataset benchmark</p>
+                        </div>
+                        <button class="btn-primary-purple" id="btnRunEval">▶ Run Benchmark Eval</button>
+                    </div>
+                    <div id="gateMessagesBox" style="font-family:var(--font-mono); font-size:0.85rem; background:#F8FAFC; padding:12px; border-radius:var(--radius-sm); margin-top:8px;"></div>
+                </div>
+
+                <!-- Aggregates KPI Grid -->
+                <div class="kpi-grid margin-bottom">
+                    <div class="kpi-card">
+                        <div class="kpi-body">
+                            <span class="kpi-label">Faithfulness</span>
+                            <span class="kpi-value" id="evalFaithfulness">--</span>
+                        </div>
+                        <div class="kpi-footer">Threshold: 0.85 (HARD)</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-body">
+                            <span class="kpi-label">Citation Validity</span>
+                            <span class="kpi-value" id="evalCitationValid">--%</span>
+                        </div>
+                        <div class="kpi-footer">Threshold: 100% (HARD)</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-body">
+                            <span class="kpi-label">Answer Relevance</span>
+                            <span class="kpi-value" id="evalRelevance">--</span>
+                        </div>
+                        <div class="kpi-footer">Threshold: 0.85</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-body">
+                            <span class="kpi-label">Retrieval Hit Rate</span>
+                            <span class="kpi-value" id="evalHitRate">--%</span>
+                        </div>
+                        <div class="kpi-footer">Top-K recall accuracy</div>
+                    </div>
+                </div>
+
+                <!-- Per-case Benchmark Table Card -->
+                <div class="card">
+                    <div class="card-header-row">
+                        <h3>📊 Golden Dataset Per-Case Results</h3>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="audit-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Question</th>
+                                    <th>Faithfulness</th>
+                                    <th>Precision</th>
+                                    <th>Recall</th>
+                                    <th>Hit</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="evalTableBody">
+                                <tr>
+                                    <td colspan="7" class="text-center">Loading evaluation report...</td>
                                 </tr>
                             </tbody>
                         </table>
