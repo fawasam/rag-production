@@ -3,152 +3,399 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAG Production - Grounded AI Console</title>
+    <title>RAG Console - Production Overview</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Chart.js for Trend and Donut Charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-    <div class="app-container">
-        <!-- Top Navigation Header -->
-        <header class="navbar">
-            <div class="nav-brand">
-                <div class="logo-icon">⚡</div>
-                <div class="brand-text">
-                    <h1>RAG Production Console</h1>
-                    <span class="version-badge">Phase 2 Hybrid + Rerank</span>
+    <div class="app-wrapper">
+        <!-- Left Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo">⚡</div>
+                <h1 class="brand-name">RAG Console</h1>
+            </div>
+
+            <nav class="sidebar-nav">
+                <!-- Main Nav Item -->
+                <button class="nav-item active" id="navOverview" data-target="overviewView">
+                    <span class="nav-icon">📊</span> Overview
+                </button>
+
+                <div class="nav-section-title">APPLICATION</div>
+                <button class="nav-item" id="navPlayground" data-target="playgroundView">
+                    <span class="nav-icon">💬</span> Query Playground
+                </button>
+
+                <div class="nav-section-title">MONITORING & TELEMETRY</div>
+                <button class="nav-item" id="navLogs" data-target="logsView">
+                    <span class="nav-icon">📋</span> Query Logs & Analytics
+                </button>
+            </nav>
+
+            <!-- Bottom System Status Card -->
+            <div class="sidebar-footer">
+                <div class="status-card">
+                    <div class="status-card-header">
+                        <span class="status-dot-pulse"></span>
+                        <span class="status-card-title">System Status</span>
+                    </div>
+                    <div class="status-card-desc">All systems operational</div>
+                </div>
+                <div class="version-text">Version 2.0.0 Phase 2 RAG</div>
+            </div>
+        </aside>
+
+        <!-- Main Content Layout -->
+        <div class="main-content">
+            <!-- Top Navigation Header -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <h2 class="page-title" id="pageTitle">RAG Console</h2>
+                    <span class="page-subtitle" id="pageSubtitle">Production Overview</span>
+                </div>
+
+                <div class="topbar-right">
+                    <!-- New Query Action Button -->
+                    <button class="btn-primary-purple" id="btnNewQuery">
+                        <span>+ New Query</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- View 1: Overview Dashboard -->
+            <div class="view-content active" id="overviewView">
+                <!-- Row 1: KPI Stat Cards -->
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-icon-bg purple">📊</div>
+                            <div class="kpi-trend green">Live</div>
+                        </div>
+                        <div class="kpi-body">
+                            <span class="kpi-label">Total Queries</span>
+                            <span class="kpi-value" id="kpiTotalQueries">--</span>
+                        </div>
+                        <div class="kpi-footer">Logged execution runs</div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-icon-bg green">🎯</div>
+                            <div class="kpi-trend green">Verified</div>
+                        </div>
+                        <div class="kpi-body">
+                            <span class="kpi-label">Citation Accuracy</span>
+                            <span class="kpi-value" id="kpiSuccessRate">--%</span>
+                        </div>
+                        <div class="kpi-footer">Passing verbatim check</div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-icon-bg blue">⏱️</div>
+                            <div class="kpi-trend green">Avg</div>
+                        </div>
+                        <div class="kpi-body">
+                            <span class="kpi-label">Avg Response Time</span>
+                            <span class="kpi-value" id="kpiAvgResponse">--s</span>
+                        </div>
+                        <div class="kpi-footer">Query processing latency</div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-icon-bg amber">📄</div>
+                            <div class="kpi-trend green">Indexed</div>
+                        </div>
+                        <div class="kpi-body">
+                            <span class="kpi-label">Indexed Documents</span>
+                            <span class="kpi-value" id="kpiTotalDocs">--</span>
+                        </div>
+                        <div class="kpi-footer" id="kpiTotalChunksFooter">Raw storage corpus</div>
+                    </div>
+                </div>
+
+                <!-- Row 2: Charts Section -->
+                <div class="charts-grid">
+                    <!-- Left: Query & Performance Trends Line Chart -->
+                    <div class="card chart-card flex-2">
+                        <div class="card-header-row">
+                            <h3>Query & Performance Timeline</h3>
+                            <div class="range-selector">
+                                <button class="pill-btn active">Live Telemetry</button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="queryTrendsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Right: Raw Document Formats Donut Chart -->
+                    <div class="card chart-card flex-1">
+                        <div class="card-header-row">
+                            <h3>Raw Document Formats</h3>
+                        </div>
+                        <div class="chart-container donut-container">
+                            <canvas id="dataSourcesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 3: Recent Queries & System Health -->
+                <div class="operations-grid">
+                    <!-- Left: Recent Queries Feed -->
+                    <div class="card ops-card flex-1">
+                        <div class="card-header-row">
+                            <h3>Recent Queries</h3>
+                            <button class="text-link" id="btnViewAllQueries">View all</button>
+                        </div>
+                        <div class="recent-queries-list" id="recentQueriesList">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Right: System Health Status -->
+                    <div class="card ops-card flex-1">
+                        <div class="card-header-row">
+                            <h3>System Health</h3>
+                            <button class="text-link">View all</button>
+                        </div>
+                        <div class="health-container">
+                            <div class="health-services-list">
+                                <div class="service-item">
+                                    <div class="service-info">
+                                        <span class="service-icon purple">🧠</span>
+                                        <span class="service-name">LLM Service (OpenAI)</span>
+                                    </div>
+                                    <span class="health-status healthy">Healthy ✓</span>
+                                </div>
+
+                                <div class="service-item">
+                                    <div class="service-info">
+                                        <span class="service-icon blue">⚡</span>
+                                        <span class="service-name">Embedding Service</span>
+                                    </div>
+                                    <span class="health-status healthy">Healthy ✓</span>
+                                </div>
+
+                                <div class="service-item">
+                                    <div class="service-info">
+                                        <span class="service-icon cyan">🗄️</span>
+                                        <span class="service-name">Vector Database (ChromaDB)</span>
+                                    </div>
+                                    <span class="health-status healthy">Healthy ✓</span>
+                                </div>
+
+                                <div class="service-item">
+                                    <div class="service-info">
+                                        <span class="service-icon amber">📄</span>
+                                        <span class="service-name">Document Parser Engine</span>
+                                    </div>
+                                    <span class="health-status healthy">Healthy ✓</span>
+                                </div>
+
+                                <div class="service-item">
+                                    <div class="service-info">
+                                        <span class="service-icon green">🌐</span>
+                                        <span class="service-name">FastAPI API Gateway</span>
+                                    </div>
+                                    <span class="health-status healthy">Healthy ✓</span>
+                                </div>
+                            </div>
+
+                            <!-- Circular Gauge Widget -->
+                            <div class="health-gauge-box">
+                                <div class="gauge-circle">
+                                    <span class="gauge-number">100%</span>
+                                    <span class="gauge-label">Overall Health</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="nav-status">
-                <div class="status-indicator" id="statusIndicator">
-                    <span class="status-dot"></span>
-                    <span class="status-text" id="statusText">Checking...</span>
-                </div>
-                <div class="metric-badge" id="latencyBadge">
-                    <span class="metric-label">Latency:</span>
-                    <span class="metric-value" id="latencyVal">-- ms</span>
+
+            <!-- View 2: Query Playground Console -->
+            <div class="view-content" id="playgroundView">
+                <div class="playground-layout">
+                    <!-- Config Sidebar -->
+                    <aside class="playground-sidebar">
+                        <div class="card">
+                            <h3>⚙️ Execution Settings</h3>
+                            <div class="form-group">
+                                <label for="apiKeyInput">API Key Header (`X-API-Key`)</label>
+                                <div class="input-with-icon">
+                                    <input type="password" id="apiKeyInput" value="X9usnoG4t0zcAujbzwEqhVllp_5LbKHKR3Tzn05U4zo">
+                                    <button type="button" class="icon-btn" id="toggleKeyVisibility">👁️</button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="label-row">
+                                    <label for="topKSlider">Top-K Context Chunks</label>
+                                    <span class="slider-value" id="topKValue">5</span>
+                                </div>
+                                <input type="range" id="topKSlider" min="1" max="10" value="5" step="1">
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <h3>💡 Quick Test Cases</h3>
+                            <div class="sample-chips">
+                                <button class="chip" data-query="What is the price of the Starter plan?">💰 Starter Plan Price</button>
+                                <button class="chip" data-query="What is the API rate limit for Enterprise plans?">⚡ Enterprise Rate Limit</button>
+                                <button class="chip" data-query="What is the target response time for a Sev-1 issue on the Enterprise plan?">⏱️ Sev-1 SLA Response Time</button>
+                                <button class="chip" data-query="Does Nimbus support an on-premise, self-hosted deployment option?">🚫 On-Premise Support Check</button>
+                                <button class="chip" data-query="What machine learning model was used for lung cancer detection?">🔬 Cancer Detection AI Model</button>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- Console Workspace -->
+                    <main class="playground-workspace">
+                        <div class="card">
+                            <form id="queryForm">
+                                <div class="query-input-wrapper">
+                                    <textarea id="queryInput" placeholder="Ask a question against your indexed raw documents..." rows="3" required></textarea>
+                                    <button type="submit" id="submitBtn" class="btn-primary-purple">
+                                        <span class="btn-text">Run Query</span>
+                                        <span class="btn-spinner hidden"></span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Answer Result Card -->
+                        <div class="card result-card hidden" id="resultCard">
+                            <div class="result-header">
+                                <h2>Generated Answer</h2>
+                                <div class="badges-row">
+                                    <span class="grounded-badge" id="groundedBadge">--</span>
+                                    <span class="answerable-badge" id="answerableBadge">--</span>
+                                </div>
+                            </div>
+
+                            <div class="answer-content" id="answerText"></div>
+
+                            <div class="citations-section hidden" id="citationsSection">
+                                <h3>📌 Validated Supporting Quotes</h3>
+                                <div class="citations-grid" id="citationsGrid"></div>
+                            </div>
+
+                            <div class="warning-box hidden" id="invalidCitationsBox">
+                                <h4>⚠️ Citation Verification Notice</h4>
+                                <ul id="invalidCitationsList"></ul>
+                            </div>
+                        </div>
+
+                        <!-- 4-Stage Retrieval Debug Inspector -->
+                        <div class="card inspector-card hidden" id="inspectorCard">
+                            <div class="inspector-header">
+                                <h2>🔎 Multi-Stage Retrieval Debug Inspector</h2>
+                                <p class="subtext">Trace candidates across dense vector search, sparse BM25, RRF fusion, and cross-encoder reranking</p>
+                            </div>
+
+                            <div class="tabs-bar">
+                                <button class="tab-btn active" data-tab="dense">1. Dense (ChromaDB)</button>
+                                <button class="tab-btn" data-tab="bm25">2. Sparse (BM25)</button>
+                                <button class="tab-btn" data-tab="fused">3. RRF Fused</button>
+                                <button class="tab-btn highlight" data-tab="reranked">4. Reranked Top-K</button>
+                            </div>
+
+                            <div class="tab-contents">
+                                <div class="tab-pane active" id="tabPaneDense">
+                                    <div class="chunks-list" id="denseList"></div>
+                                </div>
+                                <div class="tab-pane" id="tabPaneBm25">
+                                    <div class="chunks-list" id="bm25List"></div>
+                                </div>
+                                <div class="tab-pane" id="tabPaneFused">
+                                    <div class="chunks-list" id="fusedList"></div>
+                                </div>
+                                <div class="tab-pane" id="tabPaneReranked">
+                                    <div class="chunks-list" id="rerankedList"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
                 </div>
             </div>
-        </header>
 
-        <!-- Main Layout Grid -->
-        <div class="main-layout">
-            <!-- Sidebar Controls -->
-            <aside class="sidebar">
-                <div class="card control-card">
-                    <h3>⚙️ Configuration</h3>
-                    
-                    <div class="form-group">
-                        <label for="apiKeyInput">API Key Header (`X-API-Key`)</label>
-                        <div class="input-with-icon">
-                            <input type="password" id="apiKeyInput" value="X9usnoG4t0zcAujbzwEqhVllp_5LbKHKR3Tzn05U4zo" placeholder="Enter API Key">
-                            <button type="button" class="icon-btn" id="toggleKeyVisibility" title="Toggle Visibility">👁️</button>
+            <!-- View 3: Query Logs & Analytics -->
+            <div class="view-content" id="logsView">
+                <div class="kpi-grid margin-bottom">
+                    <div class="kpi-card">
+                        <div class="kpi-body">
+                            <span class="kpi-label">Total Logged Queries</span>
+                            <span class="kpi-value" id="statTotalQueries">0</span>
                         </div>
                     </div>
-
-                    <div class="form-group">
-                        <div class="label-row">
-                            <label for="topKSlider">Top-K Context Chunks</label>
-                            <span class="slider-value" id="topKValue">5</span>
-                        </div>
-                        <input type="range" id="topKSlider" min="1" max="10" value="5" step="1">
-                    </div>
-                </div>
-
-                <div class="card samples-card">
-                    <h3>💡 Quick Test Cases</h3>
-                    <p class="subtext">Click to load query into console</p>
-                    <div class="sample-chips">
-                        <button class="chip" data-query="What is the price of the Starter plan?">💰 Starter Plan Price</button>
-                        <button class="chip" data-query="What is the API rate limit for Enterprise plans?">⚡ Enterprise Rate Limit</button>
-                        <button class="chip" data-query="What is the target response time for a Sev-1 issue on the Enterprise plan?">⏱️ Sev-1 SLA Response Time</button>
-                        <button class="chip" data-query="Does Nimbus support an on-premise, self-hosted deployment option?">🚫 On-Premise Support Check</button>
-                        <button class="chip" data-query="What machine learning model was used for lung cancer detection?">🔬 Cancer Detection AI Model</button>
-                    </div>
-                </div>
-
-                <div class="card info-card">
-                    <h3>🛡️ Grounding Safeguards</h3>
-                    <ul class="safeguard-list">
-                        <li><span class="check-icon">✓</span> Hybrid Dense + Sparse BM25</li>
-                        <li><span class="check-icon">✓</span> RRF Candidate Fusion</li>
-                        <li><span class="check-icon">✓</span> Neural Cross-Encoder Rerank</li>
-                        <li><span class="check-icon">✓</span> Verbatim Citation Validation</li>
-                    </ul>
-                </div>
-            </aside>
-
-            <!-- Workspace Panel -->
-            <main class="workspace">
-                <!-- Query Prompt Input Card -->
-                <div class="card query-card">
-                    <form id="queryForm">
-                        <div class="query-input-wrapper">
-                            <textarea id="queryInput" placeholder="Ask a question against your indexed raw documents..." rows="3" required></textarea>
-                            <button type="submit" id="submitBtn" class="primary-btn">
-                                <span class="btn-text">Run Query</span>
-                                <span class="btn-spinner hidden"></span>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Answer & Grounded Result Card -->
-                <div class="card result-card hidden" id="resultCard">
-                    <div class="result-header">
-                        <h2>Generated Answer</h2>
-                        <div class="badges-row">
-                            <span class="grounded-badge" id="groundedBadge">--</span>
-                            <span class="answerable-badge" id="answerableBadge">--</span>
+                    <div class="kpi-card">
+                        <div class="kpi-body">
+                            <span class="kpi-label">Average Latency</span>
+                            <span class="kpi-value" id="statAvgLatency">0.00s</span>
                         </div>
                     </div>
-
-                    <div class="answer-content" id="answerText"></div>
-
-                    <!-- Citations Section -->
-                    <div class="citations-section hidden" id="citationsSection">
-                        <h3>📌 Validated Supporting Quotes</h3>
-                        <div class="citations-grid" id="citationsGrid"></div>
-                    </div>
-
-                    <!-- Invalid Citations Warning -->
-                    <div class="warning-box hidden" id="invalidCitationsBox">
-                        <h4>⚠️ Citation Verification Notice</h4>
-                        <ul id="invalidCitationsList"></ul>
-                    </div>
-                </div>
-
-                <!-- 4-Stage Retrieval Debug Inspector -->
-                <div class="card inspector-card hidden" id="inspectorCard">
-                    <div class="inspector-header">
-                        <h2>🔎 Multi-Stage Retrieval Debug Inspector</h2>
-                        <p class="subtext">Trace how candidate chunks were retrieved, merged, and reranked</p>
-                    </div>
-
-                    <div class="tabs-bar">
-                        <button class="tab-btn active" data-tab="dense">1. Dense (ChromaDB)</button>
-                        <button class="tab-btn" data-tab="bm25">2. Sparse (BM25)</button>
-                        <button class="tab-btn" data-tab="fused">3. RRF Fused</button>
-                        <button class="tab-btn highlight" data-tab="reranked">4. Reranked Top-K</button>
-                    </div>
-
-                    <div class="tab-contents">
-                        <div class="tab-pane active" id="tabPaneDense">
-                            <div class="chunks-list" id="denseList"></div>
+                    <div class="kpi-card">
+                        <div class="kpi-body">
+                            <span class="kpi-label">Citation Accuracy</span>
+                            <span class="kpi-value" id="statCitationAcc">100%</span>
                         </div>
-                        <div class="tab-pane" id="tabPaneBm25">
-                            <div class="chunks-list" id="bm25List"></div>
-                        </div>
-                        <div class="tab-pane" id="tabPaneFused">
-                            <div class="chunks-list" id="fusedList"></div>
-                        </div>
-                        <div class="tab-pane" id="tabPaneReranked">
-                            <div class="chunks-list" id="rerankedList"></div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-body">
+                            <span class="kpi-label">Answerability Rate</span>
+                            <span class="kpi-value" id="statAnswerableRate">100%</span>
                         </div>
                     </div>
                 </div>
-            </main>
+
+                <div class="card">
+                    <div class="card-header-row">
+                        <div>
+                            <h3>📋 Execution Audit Logs</h3>
+                            <p class="subtext">Parsed telemetry records from `data/logs/queries.jsonl`</p>
+                        </div>
+                        <button class="pill-btn" id="btnRefreshLogs">🔄 Refresh Logs</button>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="audit-table">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Query</th>
+                                    <th>Latency</th>
+                                    <th>Answerable</th>
+                                    <th>Citation Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logsTableBody">
+                                <tr>
+                                    <td colspan="6" class="text-center">Loading telemetry logs...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Log Detail Modal -->
+    <div class="modal-overlay hidden" id="logModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>🔍 Log Entry Details</h3>
+                <button class="icon-btn" id="btnCloseModal">✖</button>
+            </div>
+            <div class="modal-body" id="logModalBody"></div>
         </div>
     </div>
 

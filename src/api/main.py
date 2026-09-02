@@ -4,6 +4,7 @@
 Run:
     uvicorn src.api.main:app --reload
 """
+import json
 import logging
 import os
 import time
@@ -18,7 +19,7 @@ from pydantic import BaseModel
 from src.api.rate_limit import enforce_rate_limit
 from src.generation.grounded_client import generate_grounded_answer
 from src.generation.llm_client import generate_answer
-from src.observability.logger import Timer, log_query
+from src.observability.logger import LOG_PATH, Timer, log_query
 from src.rerank.cross_encoder import _get_model
 from src.retrieval.dense import retrieve
 from src.retrieval.hybrid import retrieve_hybrid
@@ -117,6 +118,96 @@ def query_naive(request: QueryRequest):
     chunks = retrieve(request.query, top_k=request.top_k)
     answer = generate_answer(request.query, chunks)
     return QueryResponse(answer=answer, retrieved_chunk_ids=[c.chunk_id for c in chunks])
+
+
+RAW_DATA_PATH = Path(__file__).resolve().parents[2] / "data" / "raw"
+MANIFEST_PATH = Path(__file__).resolve().parents[2] / "data" / "processed" / "ingestion_manifest.json"
+
+
+@app.get("/v1/logs", dependencies=[Depends(enforce_rate_limit)])
+def get_query_logs(limit: int = 50):
+    """Retrieve real query execution telemetry, document inventory, format breakdown, and trends."""
+    total_docs = 0
+    file_formats = {}
+    if RAW_DATA_PATH.exists():
+        files = [f for f in RAW_DATA_PATH.iterdir() if f.is_file() and not f.name.startswith(".")]
+        total_docs = len(files)
+        for f in files:
+            ext = f.suffix.lower().replace(".", "")
+            label = ext.upper() if ext else "OTHER"
+            file_formats[label] = file_formats.get(label, 0) + 1
+
+    total_chunks = 0
+    if MANIFEST_PATH.exists():
+        try:
+            with open(MANIFEST_PATH, "r", encoding="utf-8") as mf:
+                manifest_data = json.load(mf)
+                total_chunks = sum(len(entry.get("chunk_ids", [])) for entry in manifest_data.values())
+        except Exception:
+            pass
+
+    if not LOG_PATH.exists():
+        return {
+            "summary": {
+                "total_queries": 0,
+                "avg_latency_seconds": 0.0,
+                "citation_valid_rate": 100.0,
+                "answerable_rate": 100.0,
+                "total_docs": total_docs,
+                "total_chunks": total_chunks,
+                "file_formats": file_formats,
+            },
+            "logs": [],
+        }
+
+    logs = []
+    with open(LOG_PATH, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                try:
+                    logs.append(json.loads(line))
+                except json.JSONDecodeError:
+                    continue
+
+    total_queries = len(logs)
+    if total_queries == 0:
+        return {
+            "summary": {
+                "total_queries": 0,
+                "avg_latency_seconds": 0.0,
+                "citation_valid_rate": 100.0,
+                "answerable_rate": 100.0,
+                "total_docs": total_docs,
+                "total_chunks": total_chunks,
+                "file_formats": file_formats,
+            },
+            "logs": [],
+        }
+
+    avg_latency = round(sum(l.get("latency_seconds", 0) for l in logs) / total_queries, 2)
+    valid_citations_count = sum(1 for l in logs if l.get("citations_valid", False))
+    answerable_count = sum(1 for l in logs if l.get("answerable", False))
+
+    citation_valid_rate = round((valid_citations_count / total_queries) * 100, 1)
+    answerable_rate = round((answerable_count / total_queries) * 100, 1)
+
+    recent_logs = logs[-limit:][::-1]
+
+    return {
+        "summary": {
+            "total_queries": total_queries,
+            "avg_latency_seconds": avg_latency,
+            "citation_valid_rate": citation_valid_rate,
+            "answerable_rate": answerable_rate,
+            "total_docs": total_docs,
+            "total_chunks": total_chunks,
+            "file_formats": file_formats,
+        },
+        "logs": recent_logs,
+    }
+
+
 
 
 static_dir = Path(__file__).parent / "static"

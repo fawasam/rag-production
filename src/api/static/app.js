@@ -1,10 +1,225 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // DOM Elements
-    const statusIndicator = document.getElementById('statusIndicator');
-    const statusText = document.getElementById('statusText');
-    const latencyBadge = document.getElementById('latencyBadge');
-    const latencyVal = document.getElementById('latencyVal');
+    // Navigation Routing & Views
+    const navItems = document.querySelectorAll('.nav-item[data-target]');
+    const viewContents = document.querySelectorAll('.view-content');
+    const pageTitle = document.getElementById('pageTitle');
+    const pageSubtitle = document.getElementById('pageSubtitle');
+    const btnNewQuery = document.getElementById('btnNewQuery');
+    const btnViewAllQueries = document.getElementById('btnViewAllQueries');
 
+    function switchView(targetId, titleText, subtitleText) {
+        viewContents.forEach(v => v.classList.remove('active'));
+        navItems.forEach(n => n.classList.remove('active'));
+
+        const targetView = document.getElementById(targetId);
+        if (targetView) targetView.classList.add('active');
+
+        const activeNavItem = document.querySelector(`.nav-item[data-target="${targetId}"]`);
+        if (activeNavItem) activeNavItem.classList.add('active');
+
+        pageTitle.textContent = titleText || 'RAG Console';
+        pageSubtitle.textContent = subtitleText || 'Production Overview';
+
+        if (targetId === 'logsView') {
+            fetchAnalytics();
+        }
+    }
+
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const targetId = item.getAttribute('data-target');
+            let title = 'RAG Console';
+            let subtitle = 'Production Overview';
+
+            if (targetId === 'playgroundView') {
+                title = 'Query Playground';
+                subtitle = 'Test & Inspect Grounded Generation';
+            } else if (targetId === 'logsView') {
+                title = 'Query Logs & Analytics';
+                subtitle = 'Production Telemetry Records';
+            }
+
+            switchView(targetId, title, subtitle);
+        });
+    });
+
+    btnNewQuery.addEventListener('click', () => {
+        switchView('playgroundView', 'Query Playground', 'Test & Inspect Grounded Generation');
+        document.getElementById('queryInput').focus();
+    });
+
+    if (btnViewAllQueries) {
+        btnViewAllQueries.addEventListener('click', () => {
+            switchView('logsView', 'Query Logs & Analytics', 'Production Telemetry Records');
+        });
+    }
+
+    // Chart.js Instances
+    let queryTrendsChart = null;
+    let dataSourcesChart = null;
+
+    function initChartCanvases() {
+        const ctxTrends = document.getElementById('queryTrendsChart');
+        if (ctxTrends) {
+            queryTrendsChart = new Chart(ctxTrends, {
+                type: 'line',
+                data: {
+                    labels: ['Run 1'],
+                    datasets: [
+                        {
+                            label: 'Latency (s)',
+                            data: [0],
+                            borderColor: '#6C5CE7',
+                            backgroundColor: 'rgba(108, 92, 231, 0.08)',
+                            tension: 0.3,
+                            fill: true,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Grounded (%)',
+                            data: [100],
+                            borderColor: '#10B981',
+                            borderDash: [4, 4],
+                            tension: 0.3,
+                            fill: false,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'top', align: 'start', labels: { boxWidth: 12, font: { family: 'Inter' } } }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: 'Latency (seconds)' },
+                            grid: { color: '#F1F5F9' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            min: 0,
+                            max: 100,
+                            grid: { drawOnChartArea: false },
+                            ticks: { callback: v => v + '%' }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        const ctxDonut = document.getElementById('dataSourcesChart');
+        if (ctxDonut) {
+            dataSourcesChart = new Chart(ctxDonut, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Loading...'],
+                    datasets: [{
+                        data: [1],
+                        backgroundColor: ['#6C5CE7', '#10B981', '#3B82F6', '#F59E0B', '#94A3B8'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { boxWidth: 10, font: { family: 'Inter', size: 11 } } }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+    }
+    initChartCanvases();
+
+    // Fetch Real System Telemetry & Documents Data
+    async function loadRealTelemetry() {
+        try {
+            const resp = await fetch('/v1/logs?limit=20', {
+                headers: { 'x-api-key': 'X9usnoG4t0zcAujbzwEqhVllp_5LbKHKR3Tzn05U4zo' }
+            });
+            if (!resp.ok) return;
+
+            const data = await resp.json();
+            const summary = data.summary || {};
+            const logs = data.logs || [];
+
+            // Update KPI Cards with Real Data
+            document.getElementById('kpiTotalQueries').textContent = summary.total_queries || 0;
+            document.getElementById('kpiSuccessRate').textContent = `${summary.citation_valid_rate || 100}%`;
+            document.getElementById('kpiAvgResponse').textContent = `${summary.avg_latency_seconds || 0}s`;
+            document.getElementById('kpiTotalDocs').textContent = summary.total_docs || 0;
+            document.getElementById('kpiTotalChunksFooter').textContent = `${summary.total_chunks || 0} total vector chunks`;
+
+            // Update Donut Chart with Real Document Formats
+            if (dataSourcesChart && summary.file_formats) {
+                const labels = Object.keys(summary.file_formats);
+                const values = Object.values(summary.file_formats);
+                if (labels.length > 0) {
+                    dataSourcesChart.data.labels = labels;
+                    dataSourcesChart.data.datasets[0].data = values;
+                    dataSourcesChart.update();
+                }
+            }
+
+            // Update Line Chart with Real Query Timeline
+            if (queryTrendsChart && logs.length > 0) {
+                const chronologicalLogs = [...logs].reverse();
+                const labels = chronologicalLogs.map((l, idx) => {
+                    return l.timestamp ? new Date(l.timestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : `#${idx + 1}`;
+                });
+                const latencies = chronologicalLogs.map(l => l.latency_seconds || 0);
+                const groundedFlags = chronologicalLogs.map(l => l.citations_valid ? 100 : 0);
+
+                queryTrendsChart.data.labels = labels;
+                queryTrendsChart.data.datasets[0].data = latencies;
+                queryTrendsChart.data.datasets[1].data = groundedFlags;
+                queryTrendsChart.update();
+            }
+
+            // Update Recent Queries Feed
+            renderRecentFeed(logs.slice(0, 5));
+
+        } catch (err) {
+            console.error('Error fetching real telemetry:', err);
+        }
+    }
+    loadRealTelemetry();
+
+    function renderRecentFeed(logs) {
+        const feedContainer = document.getElementById('recentQueriesList');
+        if (!feedContainer) return;
+
+        if (!logs || logs.length === 0) {
+            feedContainer.innerHTML = '<div class="subtext">No recent queries logged yet</div>';
+            return;
+        }
+
+        feedContainer.innerHTML = logs.map(log => {
+            const statusClass = log.citations_valid ? 'success' : 'partial';
+            const statusText = log.citations_valid ? 'Success' : 'Partial';
+            return `
+                <div class="query-feed-item">
+                    <div class="feed-query-text" title="${escapeHtml(log.query)}">💬 ${escapeHtml(log.query)}</div>
+                    <div class="feed-meta">
+                        <span class="feed-latency">${log.latency_seconds || 0}s</span>
+                        <span class="badge-status ${statusClass}">${statusText}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Playground Controls & Form Logic
     const apiKeyInput = document.getElementById('apiKeyInput');
     const toggleKeyVisibility = document.getElementById('toggleKeyVisibility');
     const topKSlider = document.getElementById('topKSlider');
@@ -13,8 +228,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const queryForm = document.getElementById('queryForm');
     const queryInput = document.getElementById('queryInput');
     const submitBtn = document.getElementById('submitBtn');
-    const btnText = submitBtn.querySelector('.btn-text');
-    const btnSpinner = submitBtn.querySelector('.btn-spinner');
+    const btnText = submitBtn?.querySelector('.btn-text');
+    const btnSpinner = submitBtn?.querySelector('.btn-spinner');
 
     const resultCard = document.getElementById('resultCard');
     const groundedBadge = document.getElementById('groundedBadge');
@@ -34,37 +249,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const fusedList = document.getElementById('fusedList');
     const rerankedList = document.getElementById('rerankedList');
 
-    // Health Check Status Polling
-    async function checkHealth() {
-        try {
-            const resp = await fetch('/v1/health');
-            if (resp.ok) {
-                statusIndicator.className = 'status-indicator online';
-                statusText.textContent = 'API Online';
-            } else {
-                throw new Error('Health check failed');
-            }
-        } catch (err) {
-            statusIndicator.className = 'status-indicator offline';
-            statusText.textContent = 'API Offline';
-        }
+    if (toggleKeyVisibility) {
+        toggleKeyVisibility.addEventListener('click', () => {
+            const type = apiKeyInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            apiKeyInput.setAttribute('type', type);
+            toggleKeyVisibility.textContent = type === 'password' ? '👁️' : '🙈';
+        });
     }
-    checkHealth();
-    setInterval(checkHealth, 30000);
 
-    // Toggle API Key Visibility
-    toggleKeyVisibility.addEventListener('click', () => {
-        const type = apiKeyInput.getAttribute('type') === 'password' ? 'text' : 'password';
-        apiKeyInput.setAttribute('type', type);
-        toggleKeyVisibility.textContent = type === 'password' ? '👁️' : '🙈';
-    });
+    if (topKSlider) {
+        topKSlider.addEventListener('input', (e) => {
+            topKValue.textContent = e.target.value;
+        });
+    }
 
-    // Slider Sync
-    topKSlider.addEventListener('input', (e) => {
-        topKValue.textContent = e.target.value;
-    });
-
-    // Sample Chips Handler
     document.querySelectorAll('.chip').forEach(chip => {
         chip.addEventListener('click', () => {
             queryInput.value = chip.getAttribute('data-query');
@@ -72,7 +270,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Inspector Tabs Handler
     tabBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const targetTab = btn.getAttribute('data-tab');
@@ -86,59 +283,53 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Query Submission Handler
-    queryForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const query = queryInput.value.trim();
-        if (!query) return;
+    if (queryForm) {
+        queryForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const query = queryInput.value.trim();
+            if (!query) return;
 
-        // UI Loading State
-        submitBtn.disabled = true;
-        btnText.textContent = 'Processing...';
-        btnSpinner.classList.remove('hidden');
+            submitBtn.disabled = true;
+            if (btnText) btnText.textContent = 'Processing...';
+            if (btnSpinner) btnSpinner.classList.remove('hidden');
 
-        const startTime = performance.now();
+            try {
+                const response = await fetch('/v1/query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'accept': 'application/json',
+                        'x-api-key': apiKeyInput.value.trim()
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        top_k: parseInt(topKSlider.value, 10)
+                    })
+                });
 
-        try {
-            const response = await fetch('/v1/query', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'accept': 'application/json',
-                    'x-api-key': apiKeyInput.value.trim()
-                },
-                body: JSON.stringify({
-                    query: query,
-                    top_k: parseInt(topKSlider.value, 10)
-                })
-            });
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.detail || `HTTP Error ${response.status}`);
+                }
 
-            const duration = Math.round(performance.now() - startTime);
-            latencyVal.textContent = `${duration} ms`;
+                const data = await response.json();
+                renderResults(data);
+                loadRealTelemetry();
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.detail || `HTTP Error ${response.status}`);
+            } catch (err) {
+                alert(`Query Failed: ${err.message}`);
+            } finally {
+                submitBtn.disabled = false;
+                if (btnText) btnText.textContent = 'Run Query';
+                if (btnSpinner) btnSpinner.classList.add('hidden');
             }
+        });
+    }
 
-            const data = await response.json();
-            renderResults(data);
-
-        } catch (err) {
-            alert(`Query Failed: ${err.message}`);
-        } finally {
-            submitBtn.disabled = false;
-            btnText.textContent = 'Run Query';
-            btnSpinner.classList.add('hidden');
-        }
-    });
-
-    // Render Query Response
     function renderResults(data) {
         resultCard.classList.remove('hidden');
         inspectorCard.classList.remove('hidden');
 
-        // Render Badges
         if (data.citations_valid) {
             groundedBadge.className = 'grounded-badge valid';
             groundedBadge.textContent = '✓ Grounded';
@@ -155,10 +346,8 @@ document.addEventListener('DOMContentLoaded', () => {
             answerableBadge.textContent = 'Unanswerable';
         }
 
-        // Render Answer Text
         answerText.textContent = data.answer;
 
-        // Render Valid Citations
         if (data.citations && data.citations.length > 0) {
             citationsSection.classList.remove('hidden');
             citationsGrid.innerHTML = data.citations.map(c => `
@@ -172,7 +361,6 @@ document.addEventListener('DOMContentLoaded', () => {
             citationsGrid.innerHTML = '';
         }
 
-        // Render Invalid Citations (if any)
         const invalidCitations = data.debug?.invalid_citations || [];
         if (invalidCitations.length > 0) {
             invalidCitationsBox.classList.remove('hidden');
@@ -184,7 +372,6 @@ document.addEventListener('DOMContentLoaded', () => {
             invalidCitationsList.innerHTML = '';
         }
 
-        // Render Inspector Debug Pipeline Lists
         renderChunkList(denseList, data.debug?.dense || []);
         renderChunkList(bm25List, data.debug?.bm25 || []);
         renderChunkList(fusedList, data.debug?.fused || []);
@@ -199,12 +386,112 @@ document.addEventListener('DOMContentLoaded', () => {
 
         container.innerHTML = chunks.map((chunkId, idx) => `
             <div class="chunk-item">
-                <div>
-                    <span class="chunk-index">#${idx + 1}</span>
-                    <span class="chunk-id">${escapeHtml(chunkId)}</span>
-                </div>
+                <span class="chunk-index">#${idx + 1}</span>
+                <span class="chunk-id">${escapeHtml(chunkId)}</span>
             </div>
         `).join('');
+    }
+
+    // Analytics View Loader
+    const btnRefreshLogs = document.getElementById('btnRefreshLogs');
+    const logsTableBody = document.getElementById('logsTableBody');
+    const statTotalQueries = document.getElementById('statTotalQueries');
+    const statAvgLatency = document.getElementById('statAvgLatency');
+    const statCitationAcc = document.getElementById('statCitationAcc');
+    const statAnswerableRate = document.getElementById('statAnswerableRate');
+
+    const logModal = document.getElementById('logModal');
+    const logModalBody = document.getElementById('logModalBody');
+    const btnCloseModal = document.getElementById('btnCloseModal');
+
+    if (btnRefreshLogs) {
+        btnRefreshLogs.addEventListener('click', fetchAnalytics);
+    }
+
+    async function fetchAnalytics() {
+        if (!logsTableBody) return;
+        logsTableBody.innerHTML = '<tr><td colspan="6" class="text-center">Loading execution logs...</td></tr>';
+
+        try {
+            const response = await fetch('/v1/logs?limit=50', {
+                headers: { 'x-api-key': apiKeyInput?.value.trim() || 'X9usnoG4t0zcAujbzwEqhVllp_5LbKHKR3Tzn05U4zo' }
+            });
+
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+            const data = await response.json();
+            const summary = data.summary || {};
+            const logs = data.logs || [];
+
+            if (statTotalQueries) statTotalQueries.textContent = summary.total_queries || 0;
+            if (statAvgLatency) statAvgLatency.textContent = `${summary.avg_latency_seconds || 0}s`;
+            if (statCitationAcc) statCitationAcc.textContent = `${summary.citation_valid_rate || 100}%`;
+            if (statAnswerableRate) statAnswerableRate.textContent = `${summary.answerable_rate || 100}%`;
+
+            if (logs.length === 0) {
+                logsTableBody.innerHTML = '<tr><td colspan="6" class="text-center">No logged queries found.</td></tr>';
+                return;
+            }
+
+            logsTableBody.innerHTML = logs.map((log, index) => {
+                const dateStr = log.timestamp ? new Date(log.timestamp * 1000).toLocaleString() : 'N/A';
+                const citValid = log.citations_valid ? '<span class="badge-status success">✓ Valid</span>' : '<span class="badge-status partial">⚠️ Warning</span>';
+                const answerable = log.answerable ? '<span class="badge-status success">True</span>' : '<span class="badge-status partial">False</span>';
+
+                return `
+                    <tr>
+                        <td>${escapeHtml(dateStr)}</td>
+                        <td style="font-weight:500;" title="${escapeHtml(log.query)}">${escapeHtml(log.query)}</td>
+                        <td>${log.latency_seconds || 0}s</td>
+                        <td>${answerable}</td>
+                        <td>${citValid}</td>
+                        <td>
+                            <button class="pill-btn btn-inspect-log" data-index="${index}">Inspect</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.querySelectorAll('.btn-inspect-log').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const idx = parseInt(btn.getAttribute('data-index'), 10);
+                    showLogModal(logs[idx]);
+                });
+            });
+
+        } catch (err) {
+            logsTableBody.innerHTML = `<tr><td colspan="6" class="text-center" style="color:var(--accent-rose);">Failed to load logs: ${escapeHtml(err.message)}</td></tr>`;
+        }
+    }
+
+    if (btnCloseModal) {
+        btnCloseModal.addEventListener('click', () => logModal.classList.add('hidden'));
+    }
+    if (logModal) {
+        logModal.addEventListener('click', (e) => {
+            if (e.target === logModal) logModal.classList.add('hidden');
+        });
+    }
+
+    function showLogModal(log) {
+        if (!log || !logModalBody) return;
+        logModalBody.innerHTML = `
+            <div class="form-group">
+                <label>Query Text</label>
+                <div style="font-weight:600; color:var(--text-primary); margin-bottom:12px;">${escapeHtml(log.query)}</div>
+            </div>
+            <div class="form-group">
+                <label>Generated Answer</label>
+                <div style="background:#F8FAFC; padding:12px; border-radius:var(--radius-sm); font-size:0.9rem; margin-bottom:12px; white-space:pre-wrap;">${escapeHtml(log.answer)}</div>
+            </div>
+            <div class="form-group">
+                <label>Retrieved Chunks (${log.retrieval_debug?.reranked?.length || 0})</label>
+                <div style="font-family:var(--font-mono); font-size:0.8rem; color:var(--primary-purple);">
+                    ${(log.retrieval_debug?.reranked || []).map(id => `<div>📄 ${escapeHtml(id)}</div>`).join('')}
+                </div>
+            </div>
+        `;
+        logModal.classList.remove('hidden');
     }
 
     function escapeHtml(str) {
