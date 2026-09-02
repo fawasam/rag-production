@@ -8,8 +8,11 @@ import logging
 import os
 import time
 
+from pathlib import Path
+
 from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from src.api.rate_limit import enforce_rate_limit
@@ -114,3 +117,16 @@ def query_naive(request: QueryRequest):
     chunks = retrieve(request.query, top_k=request.top_k)
     answer = generate_answer(request.query, chunks)
     return QueryResponse(answer=answer, retrieved_chunk_ids=[c.chunk_id for c in chunks])
+
+
+static_dir = Path(__file__).parent / "static"
+if static_dir.exists():
+    from fastapi.responses import FileResponse
+
+    @app.get("/", include_in_schema=False)
+    def read_root():
+        return FileResponse(static_dir / "index.html")
+
+    app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+
+

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG Production - Grounded AI Console</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Navigation Header -->
+        <header class="navbar">
+            <div class="nav-brand">
+                <div class="logo-icon">⚡</div>
+                <div class="brand-text">
+                    <h1>RAG Production Console</h1>
+                    <span class="version-badge">Phase 2 Hybrid + Rerank</span>
+                </div>
+            </div>
+            <div class="nav-status">
+                <div class="status-indicator" id="statusIndicator">
+                    <span class="status-dot"></span>
+                    <span class="status-text" id="statusText">Checking...</span>
+                </div>
+                <div class="metric-badge" id="latencyBadge">
+                    <span class="metric-label">Latency:</span>
+                    <span class="metric-value" id="latencyVal">-- ms</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Layout Grid -->
+        <div class="main-layout">
+            <!-- Sidebar Controls -->
+            <aside class="sidebar">
+                <div class="card control-card">
+                    <h3>⚙️ Configuration</h3>
+                    
+                    <div class="form-group">
+                        <label for="apiKeyInput">API Key Header (`X-API-Key`)</label>
+                        <div class="input-with-icon">
+                            <input type="password" id="apiKeyInput" value="X9usnoG4t0zcAujbzwEqhVllp_5LbKHKR3Tzn05U4zo" placeholder="Enter API Key">
+                            <button type="button" class="icon-btn" id="toggleKeyVisibility" title="Toggle Visibility">👁️</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="label-row">
+                            <label for="topKSlider">Top-K Context Chunks</label>
+                            <span class="slider-value" id="topKValue">5</span>
+                        </div>
+                        <input type="range" id="topKSlider" min="1" max="10" value="5" step="1">
+                    </div>
+                </div>
+
+                <div class="card samples-card">
+                    <h3>💡 Quick Test Cases</h3>
+                    <p class="subtext">Click to load query into console</p>
+                    <div class="sample-chips">
+                        <button class="chip" data-query="What is the price of the Starter plan?">💰 Starter Plan Price</button>
+                        <button class="chip" data-query="What is the API rate limit for Enterprise plans?">⚡ Enterprise Rate Limit</button>
+                        <button class="chip" data-query="What is the target response time for a Sev-1 issue on the Enterprise plan?">⏱️ Sev-1 SLA Response Time</button>
+                        <button class="chip" data-query="Does Nimbus support an on-premise, self-hosted deployment option?">🚫 On-Premise Support Check</button>
+                        <button class="chip" data-query="What machine learning model was used for lung cancer detection?">🔬 Cancer Detection AI Model</button>
+                    </div>
+                </div>
+
+                <div class="card info-card">
+                    <h3>🛡️ Grounding Safeguards</h3>
+                    <ul class="safeguard-list">
+                        <li><span class="check-icon">✓</span> Hybrid Dense + Sparse BM25</li>
+                        <li><span class="check-icon">✓</span> RRF Candidate Fusion</li>
+                        <li><span class="check-icon">✓</span> Neural Cross-Encoder Rerank</li>
+                        <li><span class="check-icon">✓</span> Verbatim Citation Validation</li>
+                    </ul>
+                </div>
+            </aside>
+
+            <!-- Workspace Panel -->
+            <main class="workspace">
+                <!-- Query Prompt Input Card -->
+                <div class="card query-card">
+                    <form id="queryForm">
+                        <div class="query-input-wrapper">
+                            <textarea id="queryInput" placeholder="Ask a question against your indexed raw documents..." rows="3" required></textarea>
+                            <button type="submit" id="submitBtn" class="primary-btn">
+                                <span class="btn-text">Run Query</span>
+                                <span class="btn-spinner hidden"></span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Answer & Grounded Result Card -->
+                <div class="card result-card hidden" id="resultCard">
+                    <div class="result-header">
+                        <h2>Generated Answer</h2>
+                        <div class="badges-row">
+                            <span class="grounded-badge" id="groundedBadge">--</span>
+                            <span class="answerable-badge" id="answerableBadge">--</span>
+                        </div>
+                    </div>
+
+                    <div class="answer-content" id="answerText"></div>
+
+                    <!-- Citations Section -->
+                    <div class="citations-section hidden" id="citationsSection">
+                        <h3>📌 Validated Supporting Quotes</h3>
+                        <div class="citations-grid" id="citationsGrid"></div>
+                    </div>
+
+                    <!-- Invalid Citations Warning -->
+                    <div class="warning-box hidden" id="invalidCitationsBox">
+                        <h4>⚠️ Citation Verification Notice</h4>
+                        <ul id="invalidCitationsList"></ul>
+                    </div>
+                </div>
+
+                <!-- 4-Stage Retrieval Debug Inspector -->
+                <div class="card inspector-card hidden" id="inspectorCard">
+                    <div class="inspector-header">
+                        <h2>🔎 Multi-Stage Retrieval Debug Inspector</h2>
+                        <p class="subtext">Trace how candidate chunks were retrieved, merged, and reranked</p>
+                    </div>
+
+                    <div class="tabs-bar">
+                        <button class="tab-btn active" data-tab="dense">1. Dense (ChromaDB)</button>
+                        <button class="tab-btn" data-tab="bm25">2. Sparse (BM25)</button>
+                        <button class="tab-btn" data-tab="fused">3. RRF Fused</button>
+                        <button class="tab-btn highlight" data-tab="reranked">4. Reranked Top-K</button>
+                    </div>
+
+                    <div class="tab-contents">
+                        <div class="tab-pane active" id="tabPaneDense">
+                            <div class="chunks-list" id="denseList"></div>
+                        </div>
+                        <div class="tab-pane" id="tabPaneBm25">
+                            <div class="chunks-list" id="bm25List"></div>
+                        </div>
+                        <div class="tab-pane" id="tabPaneFused">
+                            <div class="chunks-list" id="fusedList"></div>
+                        </div>
+                        <div class="tab-pane" id="tabPaneReranked">
+                            <div class="chunks-list" id="rerankedList"></div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
